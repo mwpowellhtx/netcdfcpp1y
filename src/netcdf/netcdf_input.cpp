@@ -128,9 +128,6 @@ void cdf_reader::read_dims(dim_vector & dims) {
     nc_type type;
     int32_t nelems;
 
-    //TODO: may want to pre-allocate these as with variable/data
-    dims.clear();
-
     if (try_read_typed_array_prefix(type, nelems)) {
 
         dims = dim_vector(nelems);
@@ -145,18 +142,16 @@ void cdf_reader::read_dims(dim_vector & dims) {
     }
 }
 
-attr cdf_reader::read_attr() {
+void cdf_reader::read_attr(attr & theAttr) {
 
-    attr result;
-
-    read_named(result);
+    read_named(theAttr);
 
     //TODO: the examples I am downloading do not appear to adhere to the Classic or 64-bit file format... clearly we're talking at least netCDF-4 (?), maybe later ...
-    result.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
+    theAttr.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
 
-    if (result.get_type() == nc_char) {
+    if (theAttr.get_type() == nc_char) {
         // 'nelems' is a function of the std::string in this use case.
-        result.values = { value(read_text()) };
+        theAttr.values = { value(read_text()) };
     }
     else {
 
@@ -164,13 +159,11 @@ attr cdf_reader::read_attr() {
         auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
 
         //TODO: may want to pre-allocate these as with variable/data
-        result.values.clear();
+        theAttr.values.clear();
 
-        while (result.values.size() != nelems)
-            result.values.push_back(read_primitive(result.get_type()));
+        while (theAttr.values.size() != nelems)
+            theAttr.values.push_back(read_primitive(theAttr.get_type()));
     }
-
-    return result;
 }
 
 void cdf_reader::read_attrs(attr_vector & attrs) {
@@ -178,16 +171,17 @@ void cdf_reader::read_attrs(attr_vector & attrs) {
     nc_type type;
     int32_t nelems;
 
-    //TODO: may want to pre-allocate these as with variable/data
-    attrs.clear();
-
     if (try_read_typed_array_prefix(type, nelems)) {
+
+        attrs = attr_vector(nelems);
 
         // Assert before and after expectations.
         assert(type == nc_attribute);
 
-        while (attrs.size() != nelems)
-            attrs.push_back(read_attr());
+        for (auto i = 0; i < nelems; i++) {
+            auto & anAttr = attrs[i];
+            read_attr(anAttr);
+        }
     }
 }
 
@@ -230,9 +224,6 @@ void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bo
     nc_type type;
     int32_t nelems;
 
-    //TODO: may want to pre-allocate these as with variable/data
-    vars.clear();
-
     if (try_read_typed_array_prefix(type, nelems)) {
 
         // Assert before and after expectations.
@@ -261,23 +252,25 @@ void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bo
     }
 }
 
-void cdf_reader::read_var_data(var & v, dim_vector const & dims, bool useClassic) {
+void cdf_reader::read_var_data(var & theVar, dim_vector const & dims, bool useClassic) {
 
     const auto way = std::ios::beg;
 
     if (useClassic)
-        pIS->seekg(v.offset.begin, way);
+        pIS->seekg(theVar.offset.begin, way);
     else
-        pIS->seekg(v.offset.begin64, way);
+        pIS->seekg(theVar.offset.begin64, way);
 
-    const auto type = v.get_type();
-    const auto nelems = v.vsize / get_primitive_value_size(type);
+    const auto type = theVar.get_type();
+    const auto nelems = theVar.vsize / get_primitive_value_size(type);
 
-    v.data = std::vector<value>(nelems);
+    theVar.data = std::vector<value>(nelems);
 
     // A little more efficient than creating on the stack and returning, copying, etc.
-    for (auto i = 0; i < nelems; i++)
-        assert(try_read_primitive(v.data[i], type));
+    for (auto i = 0; i < nelems; i++) {
+        auto & aDatum = theVar.data[i];
+        assert(try_read_primitive(aDatum, type));
+    }
 }
 
 void cdf_reader::read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic) {

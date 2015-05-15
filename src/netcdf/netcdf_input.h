@@ -39,7 +39,7 @@ private:
 
     void read_dims(dim_vector & dims);
 
-    attr read_attr();
+    void read_attr(attr & anAttr);
 
     void read_attrs(attr_vector & dims);
 
@@ -48,7 +48,7 @@ private:
 
     void read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic);
 
-    void read_var_data(var & v, dim_vector const & dims, bool useClassic);
+    void read_var_data(var & aVar, dim_vector const & dims, bool useClassic);
 
     void read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic);
 

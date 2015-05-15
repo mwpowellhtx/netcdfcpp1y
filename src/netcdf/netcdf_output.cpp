@@ -278,23 +278,23 @@ void cdf_writer::write_primitive(value const & v, nc_type const & type) {
     default:
         throw std::exception("unsupported nc_type");
 
-    case nc_type::nc_byte:
+    case nc_byte:
         write(*pOS, v.primitive.b);
         break;
 
-    case nc_type::nc_short:
+    case nc_short:
         write(*pOS, get_reversed_byte_order(v.primitive.s));
         break;
 
-    case nc_type::nc_int:
+    case nc_int:
         write(*pOS, get_reversed_byte_order(v.primitive.i));
         break;
 
-    case nc_type::nc_float:
+    case nc_float:
         write(*pOS, v.primitive.f);
         break;
 
-    case nc_type::nc_double:
+    case nc_double:
         write(*pOS, v.primitive.d);
         break;
     }

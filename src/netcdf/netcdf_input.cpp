@@ -14,21 +14,21 @@ cdf_version to_cdf_version(uint8_t value) {
     return static_cast<cdf_version>(value);
 }
 
-netcdf_reader::netcdf_reader(std::istream * pis, bool reverseByteOrder)
-    : pis(pis), reverseByteOrder(reverseByteOrder) {
+cdf_reader::cdf_reader(std::istream * pIS, bool reverseByteOrder)
+    : pIS(pIS), reverseByteOrder(reverseByteOrder) {
 }
 
-void netcdf_reader::read_magic(magic & magic) {
+void cdf_reader::read_magic(magic & magic) {
 
     char tmp[sizeof(magic.key)];
 
-    pis->read(tmp, sizeof(tmp));
+    pIS->read(tmp, sizeof(tmp));
 
     for (auto i = 0; i < sizeof(tmp); i++)
         if (tmp[i] != magic.key[i])
             throw std::exception("invalid file format");
 
-    magic.version = to_cdf_version(read<int8_t>(*pis));
+    magic.version = to_cdf_version(read<int8_t>(*pIS));
 }
 
 //TODO: may refactor this one...
@@ -36,31 +36,31 @@ nc_type to_nc_type(int32_t value) {
     return static_cast<nc_type>(value);
 }
 
-std::string netcdf_reader::read_text() {
+std::string cdf_reader::read_text() {
 
     //see: http://www.unidata.ucar.edu/software/netcdf/docs_rc/file_format_specifications.html
     //TODO: notwithstanding considerations such as character sets, regex, etc
     std::string text;
 
     // This is the key to reading a proper name.
-    auto nelems = get_reversed_byte_order(read<int32_t>(*pis));
+    auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
 
     while (nelems-- > 0)
-        text += read<int8_t>(*pis);
+        text += read<int8_t>(*pIS);
 
     int32_t readCount = text.length();
 
     while (try_pad_width(readCount))
-        read<int8_t>(*pis);
+        read<int8_t>(*pIS);
 
     return text;
 }
 
-void netcdf_reader::read_named(named & named) {
+void cdf_reader::read_named(named & named) {
     named.name = read_text();
 }
 
-bool netcdf_reader::try_read_primitive(value & value, nc_type const & type) {
+bool cdf_reader::try_read_primitive(value & value, nc_type const & type) {
 
     // This use case is handled elsewhere.
     assert(!(type == nc_char
@@ -71,30 +71,30 @@ bool netcdf_reader::try_read_primitive(value & value, nc_type const & type) {
     switch (type) {
 
     case nc_byte:
-        value.primitive.b = read<uint8_t>(*pis);
+        value.primitive.b = read<uint8_t>(*pIS);
         return true;
 
     case nc_short:
-        value.primitive.s = get_reversed_byte_order(read<int16_t>(*pis));
+        value.primitive.s = get_reversed_byte_order(read<int16_t>(*pIS));
         return true;
 
     case nc_int:
-        value.primitive.i = get_reversed_byte_order(read<int32_t>(*pis));
+        value.primitive.i = get_reversed_byte_order(read<int32_t>(*pIS));
         return true;
 
     case nc_float:
-        value.primitive.f = read<float_t>(*pis);
+        value.primitive.f = read<float_t>(*pIS);
         return true;
 
     case nc_double:
-        value.primitive.d = read<double_t>(*pis);
+        value.primitive.d = read<double_t>(*pIS);
         return true;
     }
 
     return false;
 }
 
-value netcdf_reader::read_primitive(nc_type const & type) {
+value cdf_reader::read_primitive(nc_type const & type) {
 
     value result;
 
@@ -103,27 +103,27 @@ value netcdf_reader::read_primitive(nc_type const & type) {
     return result;
 }
 
-bool netcdf_reader::try_read_typed_array_prefix(nc_type & type, int32_t & nelems) {
+bool cdf_reader::try_read_typed_array_prefix(nc_type & type, int32_t & nelems) {
 
-    type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pis)));
+    type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
 
-    nelems = get_reversed_byte_order(read<int32_t>(*pis));
+    nelems = get_reversed_byte_order(read<int32_t>(*pIS));
 
     return type != nc_absent;
 }
 
-dim netcdf_reader::read_dim() {
+dim cdf_reader::read_dim() {
 
     dim result;
 
     read_named(result);
 
-    result.dim_length = get_reversed_byte_order(read<int32_t>(*pis));
+    result.dim_length = get_reversed_byte_order(read<int32_t>(*pIS));
 
     return result;
 }
 
-void netcdf_reader::read_dims(dim_vector & dims) {
+void cdf_reader::read_dims(dim_vector & dims) {
 
     nc_type type;
     int32_t nelems;
@@ -144,14 +144,14 @@ void netcdf_reader::read_dims(dim_vector & dims) {
     }
 }
 
-attr netcdf_reader::read_attr() {
+attr cdf_reader::read_attr() {
 
     attr result;
 
     read_named(result);
 
     //TODO: the examples I am downloading do not appear to adhere to the Classic or 64-bit file format... clearly we're talking at least netCDF-4 (?), maybe later ...
-    result.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pis)));
+    result.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
 
     if (result.get_type() == nc_char) {
         // 'nelems' is a function of the std::string in this use case.
@@ -160,7 +160,7 @@ attr netcdf_reader::read_attr() {
     else {
 
         // Otherwise read the values as they were indicated.
-        auto nelems = get_reversed_byte_order(read<int32_t>(*pis));
+        auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
 
         //TODO: may want to pre-allocate these as with variable/data
         result.values.clear();
@@ -172,7 +172,7 @@ attr netcdf_reader::read_attr() {
     return result;
 }
 
-void netcdf_reader::read_attrs(attr_vector & attrs) {
+void cdf_reader::read_attrs(attr_vector & attrs) {
 
     nc_type type;
     int32_t nelems;
@@ -193,25 +193,25 @@ void netcdf_reader::read_attrs(attr_vector & attrs) {
     }
 }
 
-var netcdf_reader::read_var_header(dim_vector const & dims, bool useClassic) {
+var cdf_reader::read_var_header(dim_vector const & dims, bool useClassic) {
 
     auto result = var();
 
     read_named(result);
 
-    auto nelems = get_reversed_byte_order(read<int32_t>(*pis));
+    auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
     //TODO: may want to pre-allocate these as with variable/data
     result.dimids.clear();
 
     while (result.dimids.size() != nelems)
-        result.dimids.push_back(get_reversed_byte_order(read<int32_t>(*pis)));
+        result.dimids.push_back(get_reversed_byte_order(read<int32_t>(*pIS)));
 
     read_attrs(result.vattrs);
 
-    result.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pis)));
+    result.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
 
     //TODO: either redundant and/or obsolete, but still support if possible... maybe with try/catch to protect calculations
-    result.vsize = get_reversed_byte_order(read<int32_t>(*pis));
+    result.vsize = get_reversed_byte_order(read<int32_t>(*pIS));
 
     //TODO: rework the calculation ...
     ////TODO: TBD: this is an appropriate assertion?
@@ -221,15 +221,15 @@ var netcdf_reader::read_var_header(dim_vector const & dims, bool useClassic) {
     http://connect.microsoft.com/VisualStudio/feedback/details/627639/std-fstream-use-32-bit-int-as-pos-type-even-on-x64-platform */
 
     if (useClassic)
-        result.offset.begin = get_reversed_byte_order(read<int32_t>(*pis));
+        result.offset.begin = get_reversed_byte_order(read<int32_t>(*pIS));
     else
         //TODO: might need to do this one a bit differently (?)
-        result.offset.begin64 = get_reversed_byte_order(read<int64_t>(*pis));
+        result.offset.begin64 = get_reversed_byte_order(read<int64_t>(*pIS));
 
     return result;
 }
 
-void netcdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic) {
+void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic) {
 
     offset_t current;
 
@@ -271,12 +271,12 @@ void netcdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims,
     }
 }
 
-void netcdf_reader::read_var_data(var & v, dim_vector const & dims, bool useClassic) {
+void cdf_reader::read_var_data(var & v, dim_vector const & dims, bool useClassic) {
 
     if (useClassic)
-        pis->seekg(v.offset.begin, std::ios::beg);
+        pIS->seekg(v.offset.begin, std::ios::beg);
     else
-        pis->seekg(v.offset.begin64, std::ios::beg);
+        pIS->seekg(v.offset.begin64, std::ios::beg);
 
     const auto type = v.get_type();
     const auto nelems = v.vsize / get_primitive_value_size(type);
@@ -288,7 +288,7 @@ void netcdf_reader::read_var_data(var & v, dim_vector const & dims, bool useClas
         assert(try_read_primitive(v.data[i], type));
 }
 
-void netcdf_reader::read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic) {
+void cdf_reader::read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic) {
 
     // Read the non-record data in header-specified order.
     for (auto & v : vars)
@@ -301,12 +301,12 @@ void netcdf_reader::read_vars_data(var_vector & vars, dim_vector const & dims, b
             read_var_data(v, dims, useClassic);
 }
 
-netcdf_reader & netcdf_reader::read_cdf(netcdf & cdf) {
+cdf_reader & cdf_reader::read_cdf(netcdf & cdf) {
 
     read_magic(cdf.magic);
 
     //TODO: pick this one up here: look up concerning the BNF format what to expect ...
-    cdf.numrecs = get_reversed_byte_order(read<int32_t>(*pis));
+    cdf.numrecs = get_reversed_byte_order(read<int32_t>(*pIS));
 
     read_dims(cdf.dims);
 
@@ -319,6 +319,6 @@ netcdf_reader & netcdf_reader::read_cdf(netcdf & cdf) {
     return *this;
 }
 
-netcdf_reader & operator>>(netcdf_reader & reader, netcdf & cdf) {
+cdf_reader & operator>>(cdf_reader & reader, netcdf & cdf) {
     return reader.read_cdf(cdf);
 }

@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 
         std::ifstream ifs("Data/sresa1b_ncar_ccsm3-example.nc", std::ios::binary);
 
-        netcdf_reader(&ifs, true) >> cdf;
+        cdf_reader(&ifs, true) >> cdf;
 
         std::ofstream ofs("Data/testing.nc", std::ios::binary);
 

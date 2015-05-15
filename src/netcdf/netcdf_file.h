@@ -8,6 +8,8 @@
 #include <limits>
 #include <vector>
 
+///////////////////////////////////////////////////////////////////////////////
+
 int32_t pad_width(int32_t width);
 
 bool try_pad_width(int32_t & width);
@@ -47,17 +49,9 @@ bool is_primitive_type(nc_type type);
 
 int32_t get_primitive_value_size(nc_type type);
 
-//struct size_reporter {
-//
-//    virtual int32_t get_sizeof() const = 0;
-//
-//protected:
-//
-//    size_reporter();
-//    size_reporter(size_reporter const &);
-//};
+///////////////////////////////////////////////////////////////////////////////
 
-struct magic /*: public size_reporter*/ {
+struct magic {
     typedef char key_type[3];
     key_type key;
     cdf_version version;
@@ -65,8 +59,6 @@ struct magic /*: public size_reporter*/ {
     magic();
 
     magic(magic const & other);
-
-    //virtual int32_t get_sizeof() const;
 
     bool is_classic() const;
     bool is_x64() const;
@@ -76,27 +68,18 @@ private:
     void init();
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct named {
-    //int32_t nelems;
     std::string name;
     int32_t get_name_length() const;
     virtual ~named();
 protected:
     named();
     named(named const & other);
-    //int32_t get_sizeof() const;
 };
 
-//TODO: while technically, yes, this is what needs to get described, from a modeling perspective, it is unnecessary apart from I/O itself
-//struct typed_array {
-//    virtual nc_type get_type() const = 0;
-//    virtual int32_t get_nelems() const = 0;
-//    virtual ~typed_array();
-//protected:
-//    typed_array();
-//    typed_array(typed_array const & other);
-//    int32_t get_sizeof() const;
-//};
+///////////////////////////////////////////////////////////////////////////////
 
 struct value {
     /* This is generally ill advised having a union hanging out here without a closely
@@ -117,17 +100,16 @@ struct value {
     value(std::string const & text);
 
     virtual ~value();
-
-    //int32_t get_sizeof(nc_type const & type) const;
 };
 
 typedef std::vector<value> value_vector;
 
-struct dim : public named/*, public size_reporter*/ {
+///////////////////////////////////////////////////////////////////////////////
+
+struct dim : public named {
     int32_t dim_length;
     bool is_record() const;
     int32_t get_dim_length_part() const;
-    //virtual int32_t get_sizeof() const;
     dim();
     dim(dim const & other);
     virtual ~dim();
@@ -135,38 +117,18 @@ struct dim : public named/*, public size_reporter*/ {
 
 typedef std::vector<dim> dim_vector;
 
-//struct dim_array : /*public typed_array,*/ public size_reporter {
-//    //nc_type type = nc_absent; //or nc_dimension
-//    std::vector<dim> dims;
-//    virtual nc_type get_type() const;
-//    virtual int32_t get_nelems() const;
-//    virtual int32_t get_sizeof() const;
-//    dim_array();
-//    dim_array(dim_array const & other);
-//    virtual ~dim_array();
-//};
-
-struct attr : public named/*, public typed_array*//*, public size_reporter*/ {
+struct attr : public named {
     nc_type type;
     value_vector values;
     virtual nc_type get_type() const;
-    //virtual int32_t get_nelems() const;
-    //virtual int32_t get_sizeof() const;
     void set_type(nc_type const & t);
     attr();
     attr(attr const & other);
 };
 
-//// Serves as both gatt_array (global attributes) and att_array...
-//struct att_array : /*public typed_array,*/ public size_reporter {
-//    //nc_type type = nc_absent; //or nc_attribute
-//    std::vector<attr> atts;
-//    virtual nc_type get_type() const;
-//    virtual int32_t get_nelems() const;
-//    virtual int32_t get_sizeof() const;
-//};
-
 typedef std::vector<attr> attr_vector;
+
+///////////////////////////////////////////////////////////////////////////////
 
 typedef union {
     int32_t begin;
@@ -174,7 +136,7 @@ typedef union {
 } offset_t;
 
 //TODO: TBD: what other interface this will require to get/set/insert/update/delete variables, in a model-compatible manner
-struct var : public named/*, public size_reporter*/ {
+struct var : public named {
     //See rank (dimensionality) ... rank nelems (rank alone? or always INT ...)
     std::vector<int32_t> dimids;
     attr_vector vattrs;
@@ -198,36 +160,17 @@ struct var : public named/*, public size_reporter*/ {
     bool is_matrix() const;
 
     // Not to be confused with typed_array, even though these are the same sort of interface the semantics are clearly different.
-    //int32_t get_nelems() const;
     nc_type get_type() const;
     bool is_record(dim_vector const & dims) const;
-    //int32_t get_expected_nelems() const;
-    //int32_t get_calculated_size(dim_vector const & dims) const;
-    //int32_t get_calculated_size_raw(dim_vector const & dims) const;
-    //int32_t get_sizeof(bool useClassic) const;
-    //int32_t get_sizeof_data() const;
-
-//protected:
-//    virtual int32_t get_sizeof() const;
 };
 
 bool is_scalar(var const & v);
 bool is_vector(var const & v);
 bool is_matrix(var const & v);
 
-//struct var_array : /*public typed_array,*/ size_reporter {
-//    //nc_type type = nc_absent; //or nc_variable
-//    //int32_t nelems;
-//    std::vector<var> vars;
-//    virtual nc_type get_type() const;
-//    virtual int32_t get_nelems() const;
-//    int32_t get_sizeof(bool useClassic) const;
-//
-//protected:
-//    virtual int32_t get_sizeof() const;
-//};
-
 typedef std::vector<var> var_vector;
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct netcdf {
 
@@ -248,8 +191,6 @@ struct netcdf {
     netcdf(netcdf const & other);
 
     virtual ~netcdf();
-
-    //size_t get_sizeof_header();
 };
 
 #endif //NETCDF_FILE_H

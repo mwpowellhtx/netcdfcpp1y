@@ -5,9 +5,13 @@
 #include <vector>
 #include <cassert>
 
-cdf_writer::cdf_writer(std::ostream * pos, bool reverse_byte_order)
-    : pos(pos), reverse_byte_order(reverse_byte_order) {
+///////////////////////////////////////////////////////////////////////////////
+
+cdf_writer::cdf_writer(std::ostream * pOS, bool reverse_byte_order)
+    : pOS(pOS), reverse_byte_order(reverse_byte_order) {
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 int32_t __sizeof() {
     return 0;
@@ -20,6 +24,8 @@ int32_t get_nelem() {
 typedef decltype(__sizeof()) sizeof_type;
 
 typedef decltype(get_nelem()) nelem_type;
+
+///////////////////////////////////////////////////////////////////////////////
 
 sizeof_type __sizeof(magic const & magic) {
 
@@ -169,11 +175,13 @@ vsize_type __sizeof_data(var const & var, dim_vector const & dims, bool useClass
     return pad_width(result);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 void cdf_writer::prepare_var_array(netcdf & cdf) {
 
     offset_t current = { 0LL };
 
-    /* Python netcdf is using the actual file position to inform the begin value
+    /* Python netcdf is using the actual file pOSition to inform the begin value
     then packing that. that's an interesting way of doing it...
     http://afni.nimh.nih.gov/pub/dist/src/pkundu/meica.libs/nibabel/externals/netcdf.py */
 
@@ -220,9 +228,9 @@ void cdf_writer::prepare_var_array(netcdf & cdf) {
 void cdf_writer::write_magic(magic const & magic) {
 
     for (auto k : magic.key)
-        *pos << k;
+        *pOS << k;
 
-    write(*pos, magic.version);
+    write(*pOS, magic.version);
 }
 
 void cdf_writer::write_text(std::string const & str) {
@@ -230,14 +238,14 @@ void cdf_writer::write_text(std::string const & str) {
     int32_t written = str.length();
 
     //Starting with the length...
-    write(*pos, get_reversed_byte_order(static_cast<int32_t>(str.length())));
+    write(*pOS, get_reversed_byte_order(static_cast<int32_t>(str.length())));
 
     // Not including the terminating null char as far as I know.
     for (auto const & c : str)
-        write(*pos, c);
+        write(*pOS, c);
 
     while (try_pad_width(written))
-        write(*pos, static_cast<uint8_t>(0x0));
+        write(*pOS, static_cast<uint8_t>(0x0));
 }
 
 void cdf_writer::write_named(named const & n) {
@@ -248,7 +256,7 @@ void cdf_writer::write_dim(dim const & dim) {
 
     write_named(dim);
 
-    write(*pos, get_reversed_byte_order(dim.dim_length));
+    write(*pOS, get_reversed_byte_order(dim.dim_length));
 }
 
 void cdf_writer::write_dims(dim_vector const & dims) {
@@ -271,23 +279,23 @@ void cdf_writer::write_primitive(value const & v, nc_type const & type) {
         throw std::exception("unsupported nc_type");
 
     case nc_type::nc_byte:
-        write(*pos, v.primitive.b);
+        write(*pOS, v.primitive.b);
         break;
 
     case nc_type::nc_short:
-        write(*pos, get_reversed_byte_order(v.primitive.s));
+        write(*pOS, get_reversed_byte_order(v.primitive.s));
         break;
 
     case nc_type::nc_int:
-        write(*pos, get_reversed_byte_order(v.primitive.i));
+        write(*pOS, get_reversed_byte_order(v.primitive.i));
         break;
 
     case nc_type::nc_float:
-        write(*pos, v.primitive.f);
+        write(*pOS, v.primitive.f);
         break;
 
     case nc_type::nc_double:
-        write(*pos, v.primitive.d);
+        write(*pOS, v.primitive.d);
         break;
     }
 }
@@ -307,7 +315,7 @@ void cdf_writer::write_attr(attr const & attr) {
 
         assert(attr.values.size() == 1);
 
-        write(*pos, get_reversed_byte_order(type));
+        write(*pOS, get_reversed_byte_order(type));
 
         write_text(attr.values.front().text);
     }
@@ -333,22 +341,22 @@ void cdf_writer::write_var_header(var & v, dim_vector const & dims, bool useClas
     write_named(v);
 
     int32_t dimids_nelems = static_cast<int32_t>(v.dimids.size());
-    write(*pos, get_reversed_byte_order(dimids_nelems));
+    write(*pOS, get_reversed_byte_order(dimids_nelems));
 
     for (const auto & dimid : v.dimids)
-        write(*pos, get_reversed_byte_order(dimid));
+        write(*pOS, get_reversed_byte_order(dimid));
 
     write_attrs(v.vattrs);
     
-    write(*pos, get_reversed_byte_order(v.get_type()));
+    write(*pOS, get_reversed_byte_order(v.get_type()));
 
     // Assume that the vsize has already been recalculated.
-    write(*pos, get_reversed_byte_order(v.vsize));
+    write(*pOS, get_reversed_byte_order(v.vsize));
 
     if (useClassic)
-        write(*pos, get_reversed_byte_order(v.offset.begin));
+        write(*pOS, get_reversed_byte_order(v.offset.begin));
     else 
-        write(*pos, get_reversed_byte_order(v.offset.begin64));
+        write(*pOS, get_reversed_byte_order(v.offset.begin64));
 }
 
 void cdf_writer::write_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic) {
@@ -374,7 +382,7 @@ void cdf_writer::write_var_data(var const & v, dim_vector const & dims, bool use
     int32_t writtenCount = v.data.size() * get_primitive_value_size(type);
 
     while (try_pad_width(writtenCount))
-        write(*pos, static_cast<uint8_t>(0x0));
+        write(*pOS, static_cast<uint8_t>(0x0));
 }
 
 void cdf_writer::write_vars_data(var_vector const & vars, dim_vector const & dims, bool useClassic) {
@@ -384,7 +392,7 @@ void cdf_writer::write_vars_data(var_vector const & vars, dim_vector const & dim
         if (!v.is_record(dims))
             write_var_data(v, dims, useClassic);
 
-    // Then read the record data. Should be only one, but may occur in any position AFAIK.
+    // Then read the record data. Should be only one, but may occur in any pOSition AFAIK.
     for (auto const & v : vars)
         if (v.is_record(dims))
             write_var_data(v, dims, useClassic);
@@ -396,7 +404,7 @@ cdf_writer & cdf_writer::operator<<(netcdf & cdf) {
 
     write_magic(cdf.magic);
 
-    write(*pos, get_reversed_byte_order(cdf.numrecs));
+    write(*pOS, get_reversed_byte_order(cdf.numrecs));
 
     write_dims(cdf.dims);
 

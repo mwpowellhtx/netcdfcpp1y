@@ -8,16 +8,18 @@
 #include "netcdf_file.h"
 #include "network_byte_order.h"
 
-struct netcdf_reader {
+///////////////////////////////////////////////////////////////////////////////
+
+struct cdf_reader {
 private:
 
-    std::istream * pis;
+    std::istream * pIS;
 
     bool reverseByteOrder;
 
 public:
 
-    netcdf_reader(std::istream * pis, bool reverseByteOrder = false);
+    cdf_reader(std::istream * pIS, bool reverseByteOrder = false);
 
 private:
 
@@ -50,9 +52,9 @@ private:
 
     void read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic);
 
-    netcdf_reader & read_cdf(netcdf & cdf);
+    cdf_reader & read_cdf(netcdf & cdf);
 
-    friend netcdf_reader & operator>>(netcdf_reader & reader, netcdf & cdf);
+    friend cdf_reader & operator>>(cdf_reader & reader, netcdf & cdf);
 
     template<typename _Ty>
     _Ty get_reversed_byte_order(_Ty const & x) {
@@ -61,6 +63,8 @@ private:
     }
 };
 
-netcdf_reader & operator>>(netcdf_reader & reader, netcdf & cdf);
+///////////////////////////////////////////////////////////////////////////////
+
+cdf_reader & operator>>(cdf_reader & reader, netcdf & cdf);
 
 #endif //NETCDF_INPUT_H

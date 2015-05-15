@@ -8,10 +8,12 @@
 #include "netcdf_file.h"
 #include "network_byte_order.h"
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct cdf_writer {
 private:
 
-    std::ostream * pos;
+    std::ostream * pOS;
 
     std::string path;
 
@@ -19,12 +21,15 @@ private:
 
 public:
 
-    cdf_writer(std::ostream * pos, bool reverse_byte_order = true);
+    cdf_writer(std::ostream * pOS, bool reverse_byte_order = true);
 
     cdf_writer & operator<<(netcdf & cdf);
 
 private:
 
+    // This has to be in the header file on account of the write_typed_array_prefix function.
+    // Otherwise it could be in the source file. We'll guard its access via the private keyword
+    // in the meantime.
     template<typename _Ty>
     static std::ostream & write(std::ostream & os, _Ty const & field) {
         //TODO: consider how to reverse byte order when necessary ...
@@ -71,10 +76,10 @@ private:
 
         // Really transparent way of accomplishing this...
         int32_t type = values.size() ? presentType : nc_absent;
-        write(*pos, get_reversed_byte_order(type));
+        write(*pOS, get_reversed_byte_order(type));
 
         int32_t nelems = values.size();
-        write(*pos, get_reversed_byte_order(nelems));
+        write(*pOS, get_reversed_byte_order(nelems));
     }
 };
 

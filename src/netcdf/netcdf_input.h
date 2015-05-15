@@ -35,16 +35,16 @@ private:
 
     bool try_read_typed_array_prefix(nc_type & type, int32_t & nelems);
 
-    dim read_dim();
+    void read_dim(dim & aDim);
 
-    void read_dims(dim_vector & arr);
+    void read_dims(dim_vector & dims);
 
     attr read_attr();
 
-    void read_attrs(attr_vector & arr);
+    void read_attrs(attr_vector & dims);
 
     //TODO: consider whether dims ought not be a first-class part of var_array...
-    void read_var_header(var & theVar, dim_vector const & dims, bool useClassic);
+    void read_var_header(var & aVar, dim_vector const & dims, bool useClassic);
 
     void read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic);
 

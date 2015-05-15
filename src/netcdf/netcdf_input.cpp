@@ -116,15 +116,11 @@ bool cdf_reader::try_read_typed_array_prefix(nc_type & type, int32_t & nelems) {
     return type != nc_absent;
 }
 
-dim cdf_reader::read_dim() {
+void cdf_reader::read_dim(dim & theDim) {
 
-    dim result;
+    read_named(theDim);
 
-    read_named(result);
-
-    result.dim_length = get_reversed_byte_order(read<int32_t>(*pIS));
-
-    return result;
+    theDim.dim_length = get_reversed_byte_order(read<int32_t>(*pIS));
 }
 
 void cdf_reader::read_dims(dim_vector & dims) {
@@ -137,11 +133,15 @@ void cdf_reader::read_dims(dim_vector & dims) {
 
     if (try_read_typed_array_prefix(type, nelems)) {
 
+        dims = dim_vector(nelems);
+
         // Assert before and after expectations.
         assert(type == nc_dimension);
 
-        while (dims.size() != nelems)
-            dims.push_back(read_dim());
+        for (auto i = 0; i < nelems; i++) {
+            auto & aDim = dims[i];
+            read_dim(aDim);
+        }
     }
 }
 
@@ -242,20 +242,20 @@ void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bo
 
         for (auto i = 0; i < nelems; i++) {
 
-            auto & var = vars[i];
+            auto & aVar = vars[i];
 
-            read_var_header(var, dims, useClassic);
+            read_var_header(aVar, dims, useClassic);
 
             //TODO: TBD: is this a dangerous assumption to be making concerning record/non-record data, position in the vector, etc?
 
             // Verify that the fp values are properly aligned.
             if (useClassic) {
-                assert(var.offset.begin > current.begin);
-                current.begin = var.offset.begin;
+                assert(aVar.offset.begin > current.begin);
+                current.begin = aVar.offset.begin;
             }
             else {
-                assert(var.offset.begin64 > current.begin64);
-                current.begin64 = var.offset.begin64;
+                assert(aVar.offset.begin64 > current.begin64);
+                current.begin64 = aVar.offset.begin64;
             }
         }
     }

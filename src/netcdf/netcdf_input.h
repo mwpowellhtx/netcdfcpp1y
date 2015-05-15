@@ -44,7 +44,7 @@ private:
     void read_attrs(attr_vector & arr);
 
     //TODO: consider whether dims ought not be a first-class part of var_array...
-    var read_var_header(dim_vector const & dims, bool useClassic);
+    void read_var_header(var & theVar, dim_vector const & dims, bool useClassic);
 
     void read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic);
 

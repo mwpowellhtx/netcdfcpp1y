@@ -191,25 +191,23 @@ void cdf_reader::read_attrs(attr_vector & attrs) {
     }
 }
 
-var cdf_reader::read_var_header(dim_vector const & dims, bool useClassic) {
+void cdf_reader::read_var_header(var & theVar, dim_vector const & dims, bool useClassic) {
 
-    auto result = var();
-
-    read_named(result);
+    read_named(theVar);
 
     auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
     //TODO: may want to pre-allocate these as with variable/data
-    result.dimids.clear();
+    theVar.dimids.clear();
 
-    while (result.dimids.size() != nelems)
-        result.dimids.push_back(get_reversed_byte_order(read<int32_t>(*pIS)));
+    while (theVar.dimids.size() != nelems)
+        theVar.dimids.push_back(get_reversed_byte_order(read<int32_t>(*pIS)));
 
-    read_attrs(result.vattrs);
+    read_attrs(theVar.vattrs);
 
-    result.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
+    theVar.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
 
     //TODO: either redundant and/or obsolete, but still support if possible... maybe with try/catch to protect calculations
-    result.vsize = get_reversed_byte_order(read<int32_t>(*pIS));
+    theVar.vsize = get_reversed_byte_order(read<int32_t>(*pIS));
 
     /* TODO: TBD: may want to refactor sizeof calculators for verification purposes. This is providing the calculation
     is correct, which I beleive it is now, and would be a good cross-check, maintaining validity of the file format(s)
@@ -219,12 +217,10 @@ var cdf_reader::read_var_header(dim_vector const & dims, bool useClassic) {
     http://connect.microsoft.com/VisualStudio/feedback/details/627639/std-fstream-use-32-bit-int-as-pos-type-even-on-x64-platform */
 
     if (useClassic)
-        result.offset.begin = get_reversed_byte_order(read<int32_t>(*pIS));
+        theVar.offset.begin = get_reversed_byte_order(read<int32_t>(*pIS));
     else
         //TODO: might need to do this one a bit differently (?)
-        result.offset.begin64 = get_reversed_byte_order(read<int64_t>(*pIS));
-
-    return result;
+        theVar.offset.begin64 = get_reversed_byte_order(read<int64_t>(*pIS));
 }
 
 void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic) {
@@ -242,22 +238,24 @@ void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bo
         // Assert before and after expectations.
         assert(type == nc_variable);
 
-        while (vars.size() != nelems) {
+        vars = var_vector(nelems);
 
-            vars.push_back(read_var_header(dims, useClassic));
+        for (auto i = 0; i < nelems; i++) {
 
-            auto & last = vars[vars.size() - 1];
+            auto & var = vars[i];
+
+            read_var_header(var, dims, useClassic);
 
             //TODO: TBD: is this a dangerous assumption to be making concerning record/non-record data, position in the vector, etc?
 
             // Verify that the fp values are properly aligned.
             if (useClassic) {
-                assert(last.offset.begin > current.begin);
-                current.begin = last.offset.begin;
+                assert(var.offset.begin > current.begin);
+                current.begin = var.offset.begin;
             }
             else {
-                assert(last.offset.begin64 > current.begin64);
-                current.begin64 = last.offset.begin64;
+                assert(var.offset.begin64 > current.begin64);
+                current.begin64 = var.offset.begin64;
             }
         }
     }

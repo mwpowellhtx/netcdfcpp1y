@@ -142,9 +142,6 @@ void cdf_reader::read_dims(dim_vector & dims) {
 
         while (dims.size() != nelems)
             dims.push_back(read_dim());
-
-        ////TODO: nothing to assert here that isn't an inherent part of being the model
-        //assert(arr.get_type() == nc_dimension);
     }
 }
 
@@ -191,9 +188,6 @@ void cdf_reader::read_attrs(attr_vector & attrs) {
 
         while (attrs.size() != nelems)
             attrs.push_back(read_attr());
-
-        //TODO: nothing to assert here: "type" is inherent property whether there are elements...
-        //assert(arr.get_type() == nc_attribute);
     }
 }
 
@@ -217,9 +211,9 @@ var cdf_reader::read_var_header(dim_vector const & dims, bool useClassic) {
     //TODO: either redundant and/or obsolete, but still support if possible... maybe with try/catch to protect calculations
     result.vsize = get_reversed_byte_order(read<int32_t>(*pIS));
 
-    //TODO: rework the calculation ...
-    ////TODO: TBD: this is an appropriate assertion?
-    //assert(result.vsize == result.get_calculated_size(dims));
+    /* TODO: TBD: may want to refactor sizeof calculators for verification purposes. This is providing the calculation
+    is correct, which I beleive it is now, and would be a good cross-check, maintaining validity of the file format(s)
+    on the way in/out of processing. */
 
     /* TODO: TBD: reading "x64" files may be an issue: seems it may be fixed ...
     http://connect.microsoft.com/VisualStudio/feedback/details/627639/std-fstream-use-32-bit-int-as-pos-type-even-on-x64-platform */
@@ -235,12 +229,7 @@ var cdf_reader::read_var_header(dim_vector const & dims, bool useClassic) {
 
 void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic) {
 
-    offset_t current;
-
-    if (useClassic)
-        current.begin = 0;
-    else
-        current.begin64 = 0LL;
+    offset_t current = { 0 };
 
     nc_type type;
     int32_t nelems;
@@ -259,6 +248,8 @@ void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bo
 
             auto & last = vars[vars.size() - 1];
 
+            //TODO: TBD: is this a dangerous assumption to be making concerning record/non-record data, position in the vector, etc?
+
             // Verify that the fp values are properly aligned.
             if (useClassic) {
                 assert(last.offset.begin > current.begin);
@@ -269,18 +260,17 @@ void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bo
                 current.begin64 = last.offset.begin64;
             }
         }
-
-        ////TODO: ditto inherent parts of the model
-        //assert(arr.get_type() == nc_variable);
     }
 }
 
 void cdf_reader::read_var_data(var & v, dim_vector const & dims, bool useClassic) {
 
+    const auto way = std::ios::beg;
+
     if (useClassic)
-        pIS->seekg(v.offset.begin, std::ios::beg);
+        pIS->seekg(v.offset.begin, way);
     else
-        pIS->seekg(v.offset.begin64, std::ios::beg);
+        pIS->seekg(v.offset.begin64, way);
 
     const auto type = v.get_type();
     const auto nelems = v.vsize / get_primitive_value_size(type);

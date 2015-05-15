@@ -41,6 +41,8 @@ enum nc_type : int32_t {
     nc_attribute = 0xc,
 };
 
+bool is_endian_type(nc_type type);
+
 bool is_primitive_type(nc_type type);
 
 int32_t get_primitive_value_size(nc_type type);

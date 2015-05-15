@@ -16,6 +16,14 @@ bool try_pad_width(int32_t & width) {
     return true;
 }
 
+bool is_endian_type(nc_type type) {
+    switch (type) {
+    case nc_short:
+    case nc_int: return true;
+    }
+    return false;
+}
+
 bool is_primitive_type(nc_type type) {
     switch (type) {
     case nc_byte:

@@ -11,13 +11,13 @@
 struct netcdf_reader {
 private:
 
-    std::istream & is;
+    std::istream * pis;
 
     bool reverseByteOrder;
 
 public:
 
-    netcdf_reader(std::istream & is, bool reverseByteOrder = false);
+    netcdf_reader(std::istream * pis, bool reverseByteOrder = false);
 
 private:
 

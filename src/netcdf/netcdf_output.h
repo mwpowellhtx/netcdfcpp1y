@@ -11,7 +11,7 @@
 struct cdf_writer {
 private:
 
-    std::ostream & os;
+    std::ostream * pos;
 
     std::string path;
 
@@ -19,7 +19,7 @@ private:
 
 public:
 
-    cdf_writer(std::ostream & os, bool reverse_byte_order = true);
+    cdf_writer(std::ostream * pos, bool reverse_byte_order = true);
 
     cdf_writer & operator<<(netcdf & cdf);
 
@@ -71,10 +71,10 @@ private:
 
         // Really transparent way of accomplishing this...
         int32_t type = values.size() ? presentType : nc_absent;
-        write(os, get_reversed_byte_order(type));
+        write(*pos, get_reversed_byte_order(type));
 
         int32_t nelems = values.size();
-        write(os, get_reversed_byte_order(nelems));
+        write(*pos, get_reversed_byte_order(nelems));
     }
 };
 

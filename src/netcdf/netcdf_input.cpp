@@ -24,11 +24,13 @@ cdf_reader::cdf_reader(std::istream * pIS, bool reverseByteOrder)
 
 void cdf_reader::read_magic(magic & magic) {
 
-    char tmp[sizeof(magic.key)];
+    const auto key_size = sizeof(magic::key_type);
 
-    pIS->read(tmp, sizeof(tmp));
+    char tmp[key_size];
 
-    for (auto i = 0; i < sizeof(tmp); i++)
+    pIS->read(tmp, key_size);
+
+    for (auto i = 0; i < key_size; i++)
         if (tmp[i] != magic.key[i])
             throw std::exception("invalid file format");
 
@@ -135,10 +137,8 @@ void cdf_reader::read_dims(dim_vector & dims) {
         // Assert before and after expectations.
         assert(type == nc_dimension);
 
-        for (auto i = 0; i < nelems; i++) {
-            auto & aDim = dims[i];
+        for (auto & aDim : dims)
             read_dim(aDim);
-        }
     }
 }
 
@@ -178,10 +178,8 @@ void cdf_reader::read_attrs(attr_vector & attrs) {
         // Assert before and after expectations.
         assert(type == nc_attribute);
 
-        for (auto i = 0; i < nelems; i++) {
-            auto & anAttr = attrs[i];
+        for (auto & anAttr : attrs)
             read_attr(anAttr);
-        }
     }
 }
 
@@ -231,9 +229,7 @@ void cdf_reader::read_vars_header(var_vector & vars, dim_vector const & dims, bo
 
         vars = var_vector(nelems);
 
-        for (auto i = 0; i < nelems; i++) {
-
-            auto & aVar = vars[i];
+        for (auto & aVar : vars) {
 
             read_var_header(aVar, dims, useClassic);
 
@@ -267,23 +263,21 @@ void cdf_reader::read_var_data(var & theVar, dim_vector const & dims, bool useCl
     theVar.data = std::vector<value>(nelems);
 
     // A little more efficient than creating on the stack and returning, copying, etc.
-    for (auto i = 0; i < nelems; i++) {
-        auto & aDatum = theVar.data[i];
+    for (auto & aDatum : theVar.data)
         assert(try_read_primitive(aDatum, type));
-    }
 }
 
 void cdf_reader::read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic) {
 
     // Read the non-record data in header-specified order.
-    for (auto & v : vars)
-        if (!v.is_record(dims))
-            read_var_data(v, dims, useClassic);
+    for (auto & aVar : vars)
+        if (!aVar.is_record(dims))
+            read_var_data(aVar, dims, useClassic);
 
     // Then read the record data. Should be only one, but may occur in any position AFAIK.
-    for (auto & v : vars)
-        if (v.is_record(dims))
-            read_var_data(v, dims, useClassic);
+    for (auto & aVar : vars)
+        if (aVar.is_record(dims))
+            read_var_data(aVar, dims, useClassic);
 }
 
 cdf_reader & cdf_reader::read_cdf(netcdf & cdf) {

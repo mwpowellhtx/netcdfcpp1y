@@ -43,6 +43,8 @@ private:
 
     void read_attrs(attr_vector & dims);
 
+    void read_dimids(dimid_vector & dimids);
+
     //TODO: consider whether dims ought not be a first-class part of var_array...
     void read_var_header(var & aVar, dim_vector const & dims, bool useClassic);
 

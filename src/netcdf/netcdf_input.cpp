@@ -183,16 +183,21 @@ void cdf_reader::read_attrs(attr_vector & attrs) {
     }
 }
 
+void cdf_reader::read_dimids(dimid_vector & dimids) {
+
+    auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
+
+    dimids = dimid_vector(nelems);
+
+    for (auto i = 0; i < nelems; i++)
+        dimids[i] = read<int32_t>(*pIS);
+}
+
 void cdf_reader::read_var_header(var & theVar, dim_vector const & dims, bool useClassic) {
 
     read_named(theVar);
 
-    auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
-    //TODO: may want to pre-allocate these as with variable/data
-    theVar.dimids.clear();
-
-    while (theVar.dimids.size() != nelems)
-        theVar.dimids.push_back(get_reversed_byte_order(read<int32_t>(*pIS)));
+    read_dimids(theVar.dimids);
 
     read_attrs(theVar.vattrs);
 

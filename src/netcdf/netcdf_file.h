@@ -135,10 +135,12 @@ typedef union {
     int64_t begin64;
 } offset_t;
 
+typedef std::vector<int32_t> dimid_vector;
+
 //TODO: TBD: what other interface this will require to get/set/insert/update/delete variables, in a model-compatible manner
 struct var : public named {
     //See rank (dimensionality) ... rank nelems (rank alone? or always INT ...)
-    std::vector<int32_t> dimids;
+    dimid_vector dimids;
     attr_vector vattrs;
     nc_type type;
     //TODO: may not support vsize after all? does it make sense to? especially with backward/forward compatibility growth concerns...

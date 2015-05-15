@@ -195,4 +195,10 @@ struct netcdf {
     virtual ~netcdf();
 };
 
+/* TODO: TBD: still to come, how to work with the "shape" of data via the netcdf;
+that's the whole point of utilizing the format, that data can be shaped and worked with
+TBD: could be some "operators" that permit definition, mutation, access, and so on;
+might be interesting to consider whether variadics hold any value for accessing values
+along a range of values */
+
 #endif //NETCDF_FILE_H

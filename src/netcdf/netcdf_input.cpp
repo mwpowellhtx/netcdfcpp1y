@@ -11,7 +11,11 @@ _Ty read(std::istream & is) {
 }
 
 cdf_version to_cdf_version(uint8_t value) {
-    return static_cast<cdf_version>(value);
+    switch (value) {
+    case classic: return classic;
+    case x64: return x64;
+    }
+    throw std::exception("unsupported cdf version");
 }
 
 cdf_reader::cdf_reader(std::istream * pIS, bool reverseByteOrder)

@@ -17,11 +17,11 @@ int main(int argc, char* argv[]) {
     {
         auto cdf = netcdf{};
 
-        std::ifstream ifs("sresa1b_ncar_ccsm3-example.nc", std::ios::binary);
+        std::ifstream ifs("Data/sresa1b_ncar_ccsm3-example.nc", std::ios::binary);
 
         netcdf_reader(ifs, true) >> cdf;
 
-        std::ofstream ofs("testing.nc", std::ios::binary);
+        std::ofstream ofs("Data/testing.nc", std::ios::binary);
 
         cdf_writer(ofs, true) << cdf;
     }
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     {
         auto cdf = netcdf{};
 
-        std::ofstream ofs("test.netcdf", std::ios::binary);
+        std::ofstream ofs("Data/testing2.nc", std::ios::binary);
 
         cdf_writer(ofs, false) << cdf;
     }

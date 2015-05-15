@@ -35,20 +35,20 @@ private:
 
     dim read_dim();
 
-    void read_dim_array(dim_array & arr);
+    void read_dims(dim_vector & arr);
 
     attr read_attr();
 
-    void read_att_array(att_array & arr);
+    void read_attrs(attr_vector & arr);
 
     //TODO: consider whether dims ought not be a first-class part of var_array...
-    var read_var_header(dim_array const & dims, bool useClassic);
+    var read_var_header(dim_vector const & dims, bool useClassic);
 
-    void read_var_array_header(var_array & arr, dim_array const & dims, bool useClassic);
+    void read_vars_header(var_vector & vars, dim_vector const & dims, bool useClassic);
 
-    void read_var_data(var & v, dim_array const & dims, bool useClassic);
+    void read_var_data(var & v, dim_vector const & dims, bool useClassic);
 
-    void read_var_array_data(var_array & arr, dim_array const & dims, bool useClassic);
+    void read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic);
 
     netcdf_reader & read_cdf(netcdf & cdf);
 

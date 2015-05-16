@@ -114,7 +114,7 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct attr;
+struct valuable;
 
 struct value {
     /* This is generally ill advised having a union hanging out here without a closely
@@ -147,10 +147,47 @@ private:
     value(float_t x);
     value(double_t x);
 
-    friend struct attr;
+    friend struct valuable;
 };
 
 typedef std::vector<value> value_vector;
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct valuable {
+
+    nc_type type;
+
+    value_vector values;
+
+    virtual nc_type get_type() const;
+    void set_type(nc_type const & aType);
+
+    template<class _Vector>
+    void set_values(_Vector const & theValues) {
+
+        nc_type type;
+
+        //TODO: TBD: may throw an exception here instead...
+        if (!try_get_type_for<_Vector::value_type>(type))
+            return;
+
+        set_type(type);
+
+        // Do it this way. This is way more efficient than the aggregate function.
+        values.clear();
+
+        std::for_each(theValues.cbegin(), theValues.cend(),
+            [&](_Vector::value_type x) { values.push_back(value(x)); });
+    }
+
+    virtual ~valuable();
+
+protected:
+
+    valuable(nc_type aType = nc_absent);
+    valuable(valuable const & other);
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -179,46 +216,12 @@ typedef std::vector<int32_t> int_vector;
 typedef std::vector<float_t> float_vector;
 typedef std::vector<double_t> double_vector;
 
-struct attr : public named {
-
-    nc_type type;
-    value_vector values;
-
-    virtual nc_type get_type() const;
-    void set_type(nc_type const & aType);
+struct attr : public named, public valuable {
 
     attr();
     attr(attr const & other);
 
-    template<class _Vector>
-    void set_values(_Vector const & values) {
-
-        nc_type type;
-
-        //TODO: TBD: may throw an exception here instead...
-        if (!try_get_type_for<_Vector::value_type>(type))
-            return;
-
-        set_type(type);
-
-        // Do it this way. This is way more efficient than the aggregate function.
-        auto & this_values = this->values;
-
-        this_values.clear();
-
-        std::for_each(values.cbegin(), values.cend(),
-            [&](_Vector::value_type x) { this_values.push_back(value(x)); });
-
-        //typedef std::function<value_vector(value_vector, _Vector::value_type)> aggregate_func;
-
-        //this->values = aggregate<_Vector::value_type, value_vector, aggregate_func>(
-        //    values, value_vector(),
-        //    [&](value_vector g, _Vector::value_type x) {
-        //    g.push_back(value(x));
-        //    return g;
-        //});
-    }
-
+    // this is a special case for attr, and not valuable, in general
     void set_text(std::string const & text);
 
 private:
@@ -263,7 +266,6 @@ protected:
     attributable(attributable const & other);
 };
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef union {
@@ -274,20 +276,15 @@ typedef union {
 typedef std::vector<int32_t> dimid_vector;
 
 //TODO: TBD: what other interface this will require to get/set/insert/update/delete variables, in a model-compatible manner
-struct var : public named, public attributable {
+struct var : public named, public attributable, public valuable {
     //See rank (dimensionality) ... rank nelems (rank alone? or always INT ...)
     dimid_vector dimids;
-    nc_type type;
     //TODO: may not support vsize after all? does it make sense to? especially with backward/forward compatibility growth concerns...
     int32_t vsize;
     //TODO: TBD: this one could be tricky ...
     offset_t offset;
-    //TODO: it's not a question of header/data, record/non-record, although it is: from a domain model perspective, data belongs to each variable
-    std::vector<value> data;
 
     var();
-
-    //TODO: possible to declare Vector as a friend?
     var(var const & other);
 
     virtual ~var();
@@ -296,14 +293,12 @@ struct var : public named, public attributable {
     bool is_vector() const;
     bool is_matrix() const;
 
-    // Not to be confused with typed_array, even though these are the same sort of interface the semantics are clearly different.
-    nc_type get_type() const;
     bool is_record(dim_vector const & dims) const;
 };
 
-bool is_scalar(var const & v);
-bool is_vector(var const & v);
-bool is_matrix(var const & v);
+bool is_scalar(var const & aVar);
+bool is_vector(var const & aVar);
+bool is_matrix(var const & aVar);
 
 typedef std::vector<var> var_vector;
 

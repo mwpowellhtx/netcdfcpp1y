@@ -159,6 +159,29 @@ void value::init(std::string const & text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+valuable::valuable(nc_type theType)
+    : type(theType)
+    , values() {
+}
+
+valuable::valuable(valuable const & other)
+    : type(other.type)
+    , values(other.values) {
+}
+
+valuable::~valuable() {
+}
+
+nc_type valuable::get_type() const {
+    return type;
+}
+
+void valuable::set_type(nc_type const & theType) {
+    type = theType;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 dim::dim()
     : named()
     , dim_length(0) {
@@ -189,36 +212,24 @@ int32_t dim::get_dim_length_part() const {
 
 attr::attr()
     : named()
-    , type(nc_absent)
-    , values() {
+    , valuable() {
 }
 
 attr::attr(std::string const & name, nc_type type)
     : named(name)
-    , type(type)
-    , values() {
+    , valuable(type) {
 }
 
 attr::attr(std::string const & name, std::string const & text)
     : named(name)
-    , type(nc_absent)
-    , values() {
+    , valuable() {
 
     set_text(text);
 }
 
 attr::attr(attr const & other)
     : named(other)
-    , type(other.type)
-    , values(other.values) {
-}
-
-nc_type attr::get_type() const {
-    return type;
-}
-
-void attr::set_type(nc_type const & theType) {
-    type = theType;
+    , valuable(other) {
 }
 
 void attr::set_text(std::string const & text) {
@@ -267,11 +278,10 @@ attr_vector::iterator attributable::get_attr(std::string const & name) {
 var::var()
     : named()
     , attributable()
+    , valuable(nc_double)
     , dimids()
-    , type(nc_double)
     , vsize(0)
-    , offset()
-    , data() {
+    , offset() {
 
     memset(&offset, sizeof(offset), 0);
 }
@@ -279,18 +289,13 @@ var::var()
 var::var(var const & other)
     : named(other)
     , attributable(other)
+    , valuable(other)
     , dimids(other.dimids)
-    , type(other.type)
     , vsize(other.vsize)
-    , offset(other.offset)
-    , data(other.data) {
+    , offset(other.offset) {
 }
 
 var::~var() {
-}
-
-nc_type var::get_type() const {
-    return type;
 }
 
 bool var::is_scalar() const {
@@ -306,16 +311,16 @@ bool var::is_matrix() const {
     return dimids.size() == rank::rank_dim_matrix;
 }
 
-bool is_scalar(var const & v) {
-    return v.is_scalar();
+bool is_scalar(var const & theVar) {
+    return theVar.is_scalar();
 }
 
-bool is_vector(var const & v) {
-    return v.is_vector();
+bool is_vector(var const & theVar) {
+    return theVar.is_vector();
 }
 
-bool is_matrix(var const & v) {
-    return v.is_matrix();
+bool is_matrix(var const & theVar) {
+    return theVar.is_matrix();
 }
 
 bool var::is_record(dim_vector const & dims) const {

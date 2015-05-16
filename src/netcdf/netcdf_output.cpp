@@ -161,7 +161,7 @@ vsize_type __sizeof_data(var const & theVar, dim_vector const & dims, bool useCl
     // http://cucis.ece.northwestern.edu/projects/PnetCDF/CDF-5.html#NOTEVSIZE5
     // http://cucis.ece.northwestern.edu/projects/PnetCDF/doc/pnetcdf-c/CDF_002d2-file-format-specification.html#NOTEVSIZE
     if (!theVar.is_record(dims)) {
-        result *= theVar.data.size();
+        result *= theVar.values.size();
     }
     else {
 
@@ -375,11 +375,11 @@ void cdf_writer::write_var_data(var const & theVar, dim_vector const & dims, boo
     //auto nelems = v.get_expected_nelems();
 
     // A little more efficient than creating on the stack and returning, copying, etc.
-    for (auto const & value : theVar.data)
+    for (auto const & value : theVar.values)
         write_primitive(value, type);
 
     // Here we do need to take variable data padding into consideration.
-    int32_t writtenCount = theVar.data.size() * get_primitive_value_size(type);
+    int32_t writtenCount = theVar.values.size() * get_primitive_value_size(type);
 
     while (try_pad_width(writtenCount))
         write(*pOS, static_cast<uint8_t>(0x0));

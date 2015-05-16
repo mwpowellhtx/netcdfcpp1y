@@ -265,11 +265,11 @@ void cdf_reader::read_var_data(var & theVar, dim_vector const & dims, bool useCl
     const auto type = theVar.get_type();
     const auto nelems = theVar.vsize / get_primitive_value_size(type);
 
-    theVar.data = std::vector<value>(nelems);
+    theVar.values = value_vector(nelems);
 
     // A little more efficient than creating on the stack and returning, copying, etc.
-    for (auto & aDatum : theVar.data)
-        assert(try_read_primitive(aDatum, type));
+    for (auto & aValue : theVar.values)
+        assert(try_read_primitive(aValue, type));
 }
 
 void cdf_reader::read_vars_data(var_vector & vars, dim_vector const & dims, bool useClassic) {

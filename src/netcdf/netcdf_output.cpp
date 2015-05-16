@@ -1,7 +1,7 @@
 #include "netcdf_output.h"
-#include "algorithm.hpp"
 
 #include <functional>
+#include <numeric>
 #include <vector>
 #include <cassert>
 
@@ -54,9 +54,9 @@ sizeof_type __sizeof(dim_vector const & dims) {
 
     // dim_array :=      ABSENT | NC_DIMENSION nelems
     auto result = sizeof(nc_type) + sizeof(nelem_type)
-        //                            [dim ...]
-        + aggregate<dim, sizeof_type>(dims, 0,
-        [&](sizeof_type const & g, dim const & x) { return g + __sizeof(x); });
+        //               [dim ...]
+        + std::accumulate(dims.begin(), dims.end(), static_cast<int32_t>(0),
+        [&](int32_t const & g, dim const & x) { return g + __sizeof(x); });
     return result;
 }
 
@@ -90,8 +90,9 @@ sizeof_type __sizeof(attr const & theAttr) {
 
     /*  The model says we either aggregage a single element vector
     (chars, or string, text), or a vector of primitives */
-    //                                                      [values]
-    auto sizeof_attr_values = aggregate<value, sizeof_type>(theAttr.values, 0,
+    //                                       [values]
+    auto sizeof_attr_values = std::accumulate(theAttr.values.begin(), theAttr.values.end(),
+        static_cast<sizeof_type>(0),
         [&](sizeof_type const & g, value const & x) { return g + __sizeof(x, type); });
 
     // Pad the values out to the nearest width.
@@ -104,8 +105,8 @@ sizeof_type __sizeof(attr_vector const & attrs) {
 
     // att_array  :=  ABSENT | NC_ATTRIBUTE nelems
     return sizeof(nc_type) + sizeof(nelem_type)
-        //                             [attr ...]
-        + aggregate<attr, sizeof_type>(attrs, 0,
+        //               [attr ...]
+        + std::accumulate(attrs.begin(), attrs.end(), static_cast<sizeof_type>(0),
         [&](sizeof_type const & g, attr const & x) { return g + __sizeof(x); });
 }
 
@@ -114,8 +115,9 @@ sizeof_type __sizeof_header(var const & theVar, dim_vector const & dims, bool us
     // var     :=          name                                              nelems
     auto result = __sizeof(reinterpret_cast<named const &>(theVar)) + sizeof(nelem_type);
 
-    //                                                       [dimid ...]
-    const auto sizeof_dims = aggregate<int32_t, sizeof_type>(theVar.dimids, 0,
+    //                                      [dimid ...]
+    const auto sizeof_dims = std::accumulate(theVar.dimids.begin(), theVar.dimids.end(),
+        static_cast<sizeof_type>(0),
         [&](sizeof_type const & g, int32_t const & x) { return g + sizeof(dims[x].dim_length); });
 
     //                 vatt_array             nc_type               vsize
@@ -131,8 +133,8 @@ sizeof_type __sizeof_header(var_vector const & vars, dim_vector const & dims, bo
 
     // var_array  :=  ABSENT | NC_VARIABLE nelems
     return sizeof(nc_type) + sizeof(nelem_type)
-        //                            [var ...]
-        + aggregate<var, sizeof_type>(vars, 0,
+        //               [var ...]
+        + std::accumulate(vars.begin(), vars.end(), static_cast<sizeof_type>(0),
         [&](sizeof_type const & g, var const & x) { return g + __sizeof_header(x, dims, useClassic); });
 }
 
@@ -168,7 +170,7 @@ vsize_type __sizeof_data(var const & theVar, dim_vector const & dims, bool useCl
         // Omitting record dimension.
         auto __normalized = [](decltype(dim::dim_length) len) {return len ? len : 1; };
 
-        result *= aggregate<int32_t, vsize_type>(theVar.dimids, 1,
+        result *= std::accumulate(theVar.dimids.begin(), theVar.dimids.end(), static_cast<vsize_type>(1),
             [&](vsize_type const & g, int32_t const & x) { return g * __normalized(dims[x].dim_length); });
     }
 

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "algorithm.hpp"
-
 #include <cstdint>
 #include <string>
 #include <limits>

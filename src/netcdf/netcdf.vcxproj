@@ -64,7 +64,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="algorithm.hpp" />
     <ClInclude Include="netcdf_file.h" />
     <ClInclude Include="netcdf_input.h" />
     <ClInclude Include="netcdf_output.h" />

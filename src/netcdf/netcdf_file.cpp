@@ -387,15 +387,14 @@ void netcdf::set_unlimited_dim(dim_vector::iterator dim_it, int32_t default_dim_
 
 void netcdf::set_unlimited_dim(dim_vector::size_type const & i, int32_t default_dim_length) {
 
-    auto dim_it = dims.begin() + i;
+    auto dim_it = get_dim(i);
 
     set_unlimited_dim(dim_it, default_dim_length);
 }
 
 void netcdf::set_unlimited_dim(std::string const & name, int32_t default_dim_length) {
 
-    auto dim_it = std::find_if(dims.begin(), dims.end(),
-        [&](dim const & x) { return x.name == name; });
+    auto dim_it = get_dim(name);
 
     set_unlimited_dim(dim_it, default_dim_length);
 }

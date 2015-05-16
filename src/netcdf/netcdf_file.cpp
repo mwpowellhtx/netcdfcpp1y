@@ -110,9 +110,8 @@ enum rank : int32_t {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-value::value()
-    : text() {
-    memset(&primitive, 0, sizeof(primitive));
+value::value() {
+    init();
 }
 
 value::value(value const & other)
@@ -120,12 +119,42 @@ value::value(value const & other)
     , text(other.text) {
 }
 
-value::value(std::string const & text)
-    : text(text) {
-    memset(&primitive, 0, sizeof(primitive));
+value::value(std::string const & text) {
+    init(text);
 }
 
+value::value(uint8_t x) {
+    init();
+    primitive.b = x;
+}
+
+value::value(int16_t x) {
+    init();
+    primitive.s = x;
+}
+
+value::value(int32_t x) {
+    init();
+    primitive.i = x;
+}
+
+value::value(float_t x) {
+    init();
+    primitive.f = x;
+}
+
+value::value(double_t x) {
+    init();
+    primitive.d = x;
+}
+
+
 value::~value() {
+}
+
+void value::init(std::string const & text) {
+    this->text = text;
+    memset(&primitive, 0, sizeof(primitive));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,6 +193,12 @@ attr::attr()
     , values() {
 }
 
+attr::attr(std::string const & name, nc_type type)
+    : named(name)
+    , type(type)
+    , values() {
+}
+
 attr::attr(attr const & other)
     : named(other)
     , type(other.type)
@@ -178,11 +213,51 @@ void attr::set_type(nc_type const & t) {
     type = t;
 }
 
+void attr::set_text(std::string const & text) {
+
+    set_type(nc_char);
+
+    values = { value(text) };
+}
+
+bool attr::is_supported_type(nc_type type) {
+    return type == nc_char
+        || is_primitive_type(type);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+attributable::attributable()
+    : attrs() {
+}
+
+attributable::attributable(attributable const & other)
+    : attrs(other.attrs) {
+}
+
+attributable::~attributable() {
+}
+
+void attributable::add_attr(attr const & theAttr) {
+    //TODO: check for things like name conflicts, etc
+    attrs.push_back(theAttr);
+}
+
+attr_vector::iterator attributable::get_attr(attr_vector::size_type i) {
+    return attrs.begin() + i;
+}
+
+attr_vector::iterator attributable::get_attr(std::string const & name) {
+    return std::find_if(attrs.begin(), attrs.end(),
+        [&](attr const & x) { return x.name == name; });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 var::var()
-    : dimids()
-    , vattrs()
+    : named()
+    , attributable()
+    , dimids()
     , type(nc_double)
     , vsize(0)
     , offset()
@@ -193,7 +268,7 @@ var::var()
 
 var::var(var const & other)
     : named(other)
-    , vattrs(other.vattrs)
+    , attributable(other)
     , dimids(other.dimids)
     , type(other.type)
     , vsize(other.vsize)
@@ -236,9 +311,10 @@ bool is_matrix(var const & v) {
 bool var::is_record(dim_vector const & dims) const {
 
     // The record dimension length is zero (0).
-    for (auto & dimid : dimids)
+    for (auto & dimid : dimids) {
         if (dims[dimid].is_record())
             return true;
+    }
 
     return false;
 }
@@ -246,18 +322,18 @@ bool var::is_record(dim_vector const & dims) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 netcdf::netcdf()
-    : magic()
+    : attributable()
+    , magic()
     , numrecs(0)
     , dims()
-    , gattrs()
     , vars() {
 }
 
 netcdf::netcdf(netcdf const & other)
-    : magic(other.magic)
+    : attributable(other)
+    , magic(other.magic)
     , numrecs(other.numrecs)
     , dims(other.dims)
-    , gattrs(other.gattrs)
     , vars(other.vars) {
 }
 
@@ -316,7 +392,8 @@ var_vector::iterator netcdf::get_var(var_vector::size_type i) {
 }
 
 var_vector::iterator netcdf::get_var(std::string const & name) {
-    return std::find_if(vars.begin(), vars.end(), [&](var const & x) { return x.name == name; });
+    return std::find_if(vars.begin(), vars.end(),
+        [&](var const & x) { return x.name == name; });
 }
 
 dim_vector::iterator netcdf::get_dim(dim_vector::size_type i) {
@@ -324,7 +401,8 @@ dim_vector::iterator netcdf::get_dim(dim_vector::size_type i) {
 }
 
 dim_vector::iterator netcdf::get_dim(std::string const & name) {
-    return std::find_if(dims.begin(), dims.end(), [&](dim const & x) { return x.name == name; });
+    return std::find_if(dims.begin(), dims.end(),
+        [&](dim const & x) { return x.name == name; });
 }
 
 void netcdf::redim_var(var_vector::iterator var_it, dim_vector_iterator_vector const & dim_its) {

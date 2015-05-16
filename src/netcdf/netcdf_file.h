@@ -43,6 +43,32 @@ enum nc_type : int32_t {
     nc_attribute = 0xc,
 };
 
+template<typename _Ty>
+nc_type get_type_for() {
+
+    auto type = nc_absent;
+    auto & tid = typeid(_Ty);
+
+    if (tid == typeid(uint8_t))
+        type = nc_byte;
+    else if (tid == typeid(int16_t))
+        type = nc_short;
+    else if (tid == typeid(int32_t))
+        type = nc_int;
+    else if (tid == typeid(float_t))
+        type = nc_float;
+    else if (tid == typeid(double_t))
+        type = nc_double;
+
+    return type;
+}
+
+template<typename _Ty>
+bool try_get_type_for(nc_type & type) {
+    type = get_type_for<_Ty>();
+    return type != nc_absent;
+}
+
 bool is_endian_type(nc_type type);
 
 bool is_primitive_type(nc_type type);
@@ -84,6 +110,8 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct attr;
+
 struct value {
     /* This is generally ill advised having a union hanging out here without a closely
     adjoined type selector, but for file format purposes, this is just fine, since the
@@ -99,10 +127,23 @@ struct value {
     std::string text;
 
     value();
-    value(value const & other);
     value(std::string const & text);
+    value(value const & other);
 
     virtual ~value();
+
+private:
+
+    void init(std::string const & text = "");
+
+    //TODO: should these be more exposed: i.e. for writer/reader purposes?
+    value(uint8_t x);
+    value(int16_t x);
+    value(int32_t x);
+    value(float_t x);
+    value(double_t x);
+
+    friend struct attr;
 };
 
 typedef std::vector<value> value_vector;
@@ -126,16 +167,84 @@ private:
 
 typedef std::vector<dim> dim_vector;
 
+struct var;
+
+typedef std::vector<uint8_t> byte_vector;
+typedef std::vector<int16_t> short_vector;
+typedef std::vector<int32_t> int_vector;
+typedef std::vector<float_t> float_vector;
+typedef std::vector<double_t> double_vector;
+
 struct attr : public named {
+
     nc_type type;
     value_vector values;
+
     virtual nc_type get_type() const;
     void set_type(nc_type const & t);
+
     attr();
     attr(attr const & other);
+
+    template<class _Vector>
+    void set_values(_Vector const & values) {
+
+        nc_type type;
+
+        //TODO: TBD: may throw an exception here instead...
+        if (!try_get_type_for<_Vector::value_type>(type))
+            return;
+
+        set_type(type);
+
+        auto & this_values = this->values;
+
+        this_values.clear();
+
+        std::for_each(values.cbegin(), values.cend(),
+            [&](_Vector::value_type x) { this_values.push_back(value(x)); });
+    }
+
+    void set_text(std::string const & text);
+
+private:
+
+    attr(std::string const & name, nc_type type = nc_absent);
+
+    friend struct attributable;
+
+    static bool is_supported_type(nc_type type);
 };
 
 typedef std::vector<attr> attr_vector;
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct attributable {
+
+    attr_vector attrs;
+
+    virtual ~attributable();
+
+    virtual void add_attr(attr const & anAttr);
+
+    //TODO: TBD: methinks that type should simply be an overloaded, inherency about how to work with attributes
+    template<class _Vector>
+    void add_attr(std::string const & name, _Vector const & values) {
+        auto & theAttr = attr(name);
+        add_attr(theAttr);
+        theAttr.set_values(values);
+    }
+
+    virtual attr_vector::iterator get_attr(attr_vector::size_type i);
+    virtual attr_vector::iterator get_attr(std::string const & name);
+
+protected:
+
+    attributable();
+    attributable(attributable const & other);
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -147,10 +256,9 @@ typedef union {
 typedef std::vector<int32_t> dimid_vector;
 
 //TODO: TBD: what other interface this will require to get/set/insert/update/delete variables, in a model-compatible manner
-struct var : public named {
+struct var : public named, public attributable {
     //See rank (dimensionality) ... rank nelems (rank alone? or always INT ...)
     dimid_vector dimids;
-    attr_vector vattrs;
     nc_type type;
     //TODO: may not support vsize after all? does it make sense to? especially with backward/forward compatibility growth concerns...
     int32_t vsize;
@@ -183,7 +291,7 @@ typedef std::vector<var> var_vector;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct netcdf {
+struct netcdf : public attributable {
 public:
 
     typedef std::vector<dim_vector::iterator> dim_vector_iterator_vector;
@@ -196,12 +304,9 @@ public:
 
     dim_vector dims;
 
-    attr_vector gattrs;
-
     var_vector vars;
 
     netcdf();
-
     netcdf(netcdf const & other);
 
     virtual ~netcdf();

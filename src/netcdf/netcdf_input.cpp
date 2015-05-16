@@ -190,7 +190,7 @@ void cdf_reader::read_dimids(dimid_vector & dimids) {
     dimids = dimid_vector(nelems);
 
     for (auto i = 0; i < nelems; i++)
-        dimids[i] = read<int32_t>(*pIS);
+        dimids[i] = get_reversed_byte_order(read<int32_t>(*pIS));
 }
 
 void cdf_reader::read_var_header(var & theVar, dim_vector const & dims, bool useClassic) {
@@ -199,7 +199,7 @@ void cdf_reader::read_var_header(var & theVar, dim_vector const & dims, bool use
 
     read_dimids(theVar.dimids);
 
-    read_attrs(theVar.vattrs);
+    read_attrs(theVar.attrs);
 
     theVar.type = to_nc_type(get_reversed_byte_order(read<int32_t>(*pIS)));
 
@@ -294,7 +294,7 @@ cdf_reader & cdf_reader::read_cdf(netcdf & cdf) {
 
     read_dims(cdf.dims);
 
-    read_attrs(cdf.gattrs);
+    read_attrs(cdf.attrs);
 
     read_vars_header(cdf.vars, cdf.dims, cdf.magic.is_classic());
 

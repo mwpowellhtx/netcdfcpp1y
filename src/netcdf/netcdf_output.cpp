@@ -118,8 +118,8 @@ sizeof_type __sizeof_header(var const & theVar, dim_vector const & dims, bool us
     const auto sizeof_dims = aggregate<int32_t, sizeof_type>(theVar.dimids, 0,
         [&](sizeof_type const & g, int32_t const & x) { return g + sizeof(dims[x].dim_length); });
 
-    //                 vatt_array              nc_type               vsize
-    result += __sizeof(theVar.vattrs) + sizeof(theVar.type) + sizeof(theVar.vsize);
+    //                 vatt_array             nc_type               vsize
+    result += __sizeof(theVar.attrs) + sizeof(theVar.type) + sizeof(theVar.vsize);
 
     //                     OFFSET := <INT with non-negative value> (classic) | <INT64 with non - negative value> (64-bit)
     const auto sizeof_begin_offset = useClassic ? sizeof(theVar.offset.begin) : sizeof(theVar.offset.begin64);
@@ -145,7 +145,7 @@ sizeof_type __sizeof_header(netcdf const & theCdf) {
         //         dim_array
         + __sizeof(theCdf.dims)
         //         gatt_array
-        + __sizeof(theCdf.gattrs)
+        + __sizeof(theCdf.attrs)
         //                var_array
         + __sizeof_header(theCdf.vars, theCdf.dims, theCdf.magic.is_classic());
 }
@@ -346,7 +346,7 @@ void cdf_writer::write_var_header(var & theVar, dim_vector const & dims, bool us
     for (const auto & dimid : theVar.dimids)
         write(*pOS, get_reversed_byte_order(dimid));
 
-    write_attrs(theVar.vattrs);
+    write_attrs(theVar.attrs);
     
     write(*pOS, get_reversed_byte_order(theVar.get_type()));
 
@@ -408,7 +408,7 @@ cdf_writer & cdf_writer::operator<<(netcdf & theCdf) {
 
     write_dims(theCdf.dims);
 
-    write_attrs(theCdf.gattrs);
+    write_attrs(theCdf.attrs);
 
     auto useClassic = theCdf.magic.is_classic();
 

@@ -6,11 +6,16 @@
 
 #pragma once
 
-template<typename _Ty, typename _Result, typename _Vector = std::vector<_Ty>>
+template<
+    typename _Ty
+    , typename _Result
+    , class _AggregateFunc = std::function<_Result(_Result const &, _Ty const &)>
+    , typename _Vector = std::vector<_Ty>
+>
 _Result aggregate(
     _Vector const & values
     , _Result value
-    , std::function<_Result(_Result const &, _Ty const &)> const & func) {
+    , _AggregateFunc const & func) {
 
     auto result = value;
 

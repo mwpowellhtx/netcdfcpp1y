@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "algorithm.hpp"
+
 #include <cstdint>
 #include <string>
 #include <limits>
@@ -181,7 +183,7 @@ struct attr : public named {
     value_vector values;
 
     virtual nc_type get_type() const;
-    void set_type(nc_type const & t);
+    void set_type(nc_type const & aType);
 
     attr();
     attr(attr const & other);
@@ -197,12 +199,22 @@ struct attr : public named {
 
         set_type(type);
 
+        // Do it this way. This is way more efficient than the aggregate function.
         auto & this_values = this->values;
 
         this_values.clear();
 
         std::for_each(values.cbegin(), values.cend(),
             [&](_Vector::value_type x) { this_values.push_back(value(x)); });
+
+        //typedef std::function<value_vector(value_vector, _Vector::value_type)> aggregate_func;
+
+        //this->values = aggregate<_Vector::value_type, value_vector, aggregate_func>(
+        //    values, value_vector(),
+        //    [&](value_vector g, _Vector::value_type x) {
+        //    g.push_back(value(x));
+        //    return g;
+        //});
     }
 
     void set_text(std::string const & text);
@@ -232,8 +244,8 @@ struct attributable {
     template<class _Vector>
     void add_attr(std::string const & name, _Vector const & values) {
         auto & theAttr = attr(name);
-        add_attr(theAttr);
         theAttr.set_values(values);
+        add_attr(theAttr);
     }
 
     virtual attr_vector::iterator get_attr(attr_vector::size_type i);

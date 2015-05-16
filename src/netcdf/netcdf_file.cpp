@@ -209,8 +209,8 @@ nc_type attr::get_type() const {
     return type;
 }
 
-void attr::set_type(nc_type const & t) {
-    type = t;
+void attr::set_type(nc_type const & theType) {
+    type = theType;
 }
 
 void attr::set_text(std::string const & text) {

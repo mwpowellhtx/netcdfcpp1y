@@ -15,18 +15,6 @@ int main(int argc, char* argv[]) {
     }
 
     {
-        auto cdf = netcdf{};
-
-        std::ifstream ifs("Data/sresa1b_ncar_ccsm3-example.nc", std::ios::binary);
-
-        cdf_reader(&ifs, true) >> cdf;
-
-        std::ofstream ofs("Data/testing.nc", std::ios::binary);
-
-        cdf_writer(&ofs, true) << cdf;
-    }
-
-    {
         attributable & aVar = var();
 
         aVar.add_attr<byte_vector>("some_bytes", { static_cast<uint8_t>(1), static_cast<uint8_t>(2), static_cast<uint8_t>(3), static_cast<uint8_t>(4), static_cast<uint8_t>(5) });
@@ -54,6 +42,18 @@ int main(int argc, char* argv[]) {
         assert(aVar.attrs[2].values.front().primitive.i == 3);
         assert(aVar.attrs[3].values.front().primitive.f == 4);
         assert(aVar.attrs[4].values.front().primitive.d == 5);
+    }
+
+    {
+        auto cdf = netcdf{};
+
+        std::ifstream ifs("Data/sresa1b_ncar_ccsm3-example.nc", std::ios::binary);
+
+        cdf_reader(&ifs, true) >> cdf;
+
+        std::ofstream ofs("Data/testing.nc", std::ios::binary);
+
+        cdf_writer(&ofs, true) << cdf;
     }
 
     {

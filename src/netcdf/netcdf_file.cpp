@@ -199,6 +199,14 @@ attr::attr(std::string const & name, nc_type type)
     , values() {
 }
 
+attr::attr(std::string const & name, std::string const & text)
+    : named(name)
+    , type(nc_absent)
+    , values() {
+
+    set_text(text);
+}
+
 attr::attr(attr const & other)
     : named(other)
     , type(other.type)
@@ -214,9 +222,7 @@ void attr::set_type(nc_type const & theType) {
 }
 
 void attr::set_text(std::string const & text) {
-
     set_type(nc_char);
-
     values = { value(text) };
 }
 
@@ -241,6 +247,10 @@ attributable::~attributable() {
 void attributable::add_attr(attr const & theAttr) {
     //TODO: check for things like name conflicts, etc
     attrs.push_back(theAttr);
+}
+
+void attributable::add_text_attr(std::string const & name, std::string const & text) {
+    add_attr(attr(name, text));
 }
 
 attr_vector::iterator attributable::get_attr(attr_vector::size_type i) {

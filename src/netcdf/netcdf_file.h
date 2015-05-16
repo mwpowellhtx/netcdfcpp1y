@@ -51,6 +51,8 @@ nc_type get_type_for() {
     auto type = nc_absent;
     auto & tid = typeid(_Ty);
 
+    // nc_char is a special case that must be handled apart from these types.
+
     if (tid == typeid(uint8_t))
         type = nc_byte;
     else if (tid == typeid(int16_t))
@@ -222,6 +224,7 @@ struct attr : public named {
 private:
 
     attr(std::string const & name, nc_type type = nc_absent);
+    attr(std::string const & name, std::string const & text);
 
     friend struct attributable;
 
@@ -239,6 +242,9 @@ struct attributable {
     virtual ~attributable();
 
     virtual void add_attr(attr const & anAttr);
+
+    // strings are kind of like vectors but they are different enough that the use cases cannot be easily co-mingled and still be useful
+    virtual void add_text_attr(std::string const & name, std::string const & text);
 
     //TODO: TBD: methinks that type should simply be an overloaded, inherency about how to work with attributes
     template<class _Vector>

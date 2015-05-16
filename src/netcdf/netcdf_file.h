@@ -49,6 +49,8 @@ bool is_primitive_type(nc_type type);
 
 int32_t get_primitive_value_size(nc_type type);
 
+struct netcdf;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct magic {
@@ -76,6 +78,7 @@ struct named {
     virtual ~named();
 protected:
     named();
+    named(std::string const & name);
     named(named const & other);
 };
 
@@ -113,6 +116,12 @@ struct dim : public named {
     dim();
     dim(dim const & other);
     virtual ~dim();
+
+private:
+
+    dim(std::string const & name, int32_t dim_length);
+
+    friend struct netcdf;
 };
 
 typedef std::vector<dim> dim_vector;
@@ -196,6 +205,9 @@ public:
     netcdf(netcdf const & other);
 
     virtual ~netcdf();
+
+    virtual void add_dim(dim const & aDim, int32_t default_dim_length = 1);
+    virtual void add_dim(std::string const & name, int32_t dim_length = 1, int32_t default_dim_length = 1);
 
     virtual dim_vector::iterator get_dim(dim_vector::size_type i);
     virtual dim_vector::iterator get_dim(std::string const & name);

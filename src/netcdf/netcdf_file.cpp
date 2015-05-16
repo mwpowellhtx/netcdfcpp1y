@@ -81,11 +81,11 @@ bool magic::is_x64() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int32_t named::get_name_length() const {
-    return static_cast<int32_t>(name.size());
+named::named() {
 }
 
-named::named() {
+named::named(std::string const & name)
+    : name(name) {
 }
 
 named::named(named const & other)
@@ -93,6 +93,10 @@ named::named(named const & other)
 }
 
 named::~named() {
+}
+
+int32_t named::get_name_length() const {
+    return static_cast<int32_t>(name.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,6 +133,11 @@ value::~value() {
 dim::dim()
     : named()
     , dim_length(0) {
+}
+
+dim::dim(std::string const & name, int32_t dim_length)
+    : named(name)
+    , dim_length(dim_length) {
 }
 
 dim::dim(dim const & other)
@@ -253,6 +262,26 @@ netcdf::netcdf(netcdf const & other)
 }
 
 netcdf::~netcdf() {
+}
+
+void netcdf::add_dim(dim const & theDim, int32_t default_dim_length) {
+
+    //TODO: check for name conflicts
+    //TODO: TBD: may inject policies into the netcdf, add/remove/access functions ... i.e. allow_add_record_dim
+
+    // There may be 0-1 unlimited (record) dims.
+    if (theDim.is_record()) {
+        for (auto & x : dims)
+            if (x.is_record())
+                x.dim_length = default_dim_length;
+    }
+
+    // Always add to the end for minimum impact on previously existing dims, dimids, etc.
+    dims.push_back(theDim);
+}
+
+void netcdf::add_dim(std::string const & name, int32_t dim_length, int32_t default_dim_length) {
+    add_dim(dim(name, dim_length), default_dim_length);
 }
 
 void netcdf::set_unlimited_dim(dim_vector::iterator dim_it, int32_t default_dim_length) {

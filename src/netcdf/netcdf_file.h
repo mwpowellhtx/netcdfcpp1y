@@ -175,6 +175,9 @@ typedef std::vector<var> var_vector;
 ///////////////////////////////////////////////////////////////////////////////
 
 struct netcdf {
+public:
+
+    typedef std::vector<dim_vector::iterator> dim_vector_iterator_vector;
 
     magic magic;
 
@@ -193,6 +196,20 @@ struct netcdf {
     netcdf(netcdf const & other);
 
     virtual ~netcdf();
+
+    virtual dim_vector::iterator get_dim(dim_vector::size_type i);
+    virtual dim_vector::iterator get_dim(std::string const & name);
+
+    virtual void set_unlimited_dim(dim_vector::iterator dim_it, int32_t default_dim_length = 1);
+    virtual void set_unlimited_dim(dim_vector::size_type const & i, int32_t default_dim_length = 1);
+    virtual void set_unlimited_dim(std::string const & name, int32_t default_dim_length = 1);
+
+    virtual var_vector::iterator get_var(var_vector::size_type i);
+    virtual var_vector::iterator get_var(std::string const & name);
+
+    virtual void redim_var(var_vector::iterator var_it, dim_vector_iterator_vector const & dim_its);
+    virtual void redim_var(var_vector::size_type i, dim_vector_iterator_vector const & dim_its);
+    virtual void redim_var(std::string const & name, dim_vector_iterator_vector const & dim_its);
 };
 
 /* TODO: TBD: still to come, how to work with the "shape" of data via the netcdf;

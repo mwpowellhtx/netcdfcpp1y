@@ -181,8 +181,6 @@ vsize_type __sizeof_data(var const & theVar, dim_vector const & dims, bool useCl
 
 void cdf_writer::prepare_var_array(netcdf & theCdf) {
 
-    offset_t current = { 0LL };
-
     /* Python netcdf is using the actual file pOSition to inform the begin value
     then packing that. that's an interesting way of doing it...
     http://afni.nimh.nih.gov/pub/dist/src/pkundu/meica.libs/nibabel/externals/netcdf.py */
@@ -193,38 +191,45 @@ void cdf_writer::prepare_var_array(netcdf & theCdf) {
     const auto useClassic = theCdf.magic.is_classic();
 
     // All of the calculations depend upon the vsize being calculated regardless whether record.
-    for (auto & v : vars)
-        v.vsize = __sizeof_data(v, dims, useClassic);
+    for (auto & aVar : vars)
+        aVar.vsize = __sizeof_data(aVar, dims, useClassic);
 
-    auto is_first = true;
+    // This is a little book keeping, that helps the subsequent operations flow much more smoothly.
+    std::vector<var_vector::iterator> record_its, its;
+
+    // TODO: TBD: may need/want to rearrange the vars according to record/non-record...
+    // TODO: using the variables, there are how many record data? that can't be right ...
+    for (auto it = vars.begin(); it != vars.end(); it++) {
+        if (it->is_record(dims))
+            record_its.push_back(it);
+        else
+            its.push_back(it);
+    }
+
+    // Concatenate the record vars to the end of the non-record vars.
+    its.insert(its.end(), record_its.begin(), record_its.end());
+
+    // Initialize the current with the size of the header.
     const auto sizeof_header = __sizeof_header(theCdf);
+    offset_t current = { { sizeof_header } };
 
     // Calculate the begin offsets for non-record data.
-    for (auto i = 0U, j = 0U; i < vars.size(); i++) {
+    for (auto bm = its.begin(); bm != its.end(); bm++) {
 
-        if (vars[i].is_record(dims)) continue;
+        // Drill through the bookmark to the true inner iterator.
+        auto var_it = *bm;
 
-        // For all non-record data.
-        if (is_first) {
+        // Just assign the current offset and be on with it.
+        var_it->offset = current;
 
-            if (useClassic)
-                vars[i].offset.begin = sizeof_header;
-            else
-                vars[i].offset.begin64 = sizeof_header;
-
-            is_first = false;
-        }
-        else {
-
-            if (useClassic)
-                vars[i].offset.begin = vars[j].offset.begin + vars[j].vsize;
-            else
-                vars[i].offset.begin64 = vars[j].offset.begin64 + vars[j].vsize;;
-        }
-
-        // Keep track of the last index j.
-        j = i;
+        // Then simply tally the size with the current offset.
+        if (useClassic)
+            current.begin += var_it->vsize;
+        else
+            current.begin64 += var_it->vsize;
     }
+
+    // TODO: TBD: then do something with the record_it ...
 }
 
 void cdf_writer::write_magic(magic const & theMagic) {

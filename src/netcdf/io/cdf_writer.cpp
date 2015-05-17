@@ -246,7 +246,7 @@ void cdf_writer::write_text(std::string const & theStr) {
     write(*pOS, get_reversed_byte_order(static_cast<int32_t>(writtenCount)));
 
     // Not including the terminating null char as far as I know.
-    for (auto const & c : theStr)
+    for (const auto & c : theStr)
         write(*pOS, c);
 
     while (try_pad_width(writtenCount))
@@ -269,8 +269,8 @@ void cdf_writer::write_dims(dim_vector const & dims) {
     write_typed_array_prefix(dims, nc_dimension);
 
     // Followed by the dims themselves.
-    for (auto const & dim : dims)
-        write_dim(dim);
+    for (const auto & aDim : dims)
+        write_dim(aDim);
 }
 
 void cdf_writer::write_primitive(value const & theValue, nc_type const & type) {
@@ -328,8 +328,8 @@ void cdf_writer::write_attr(attr const & theAttr) {
 
         write_typed_array_prefix(theAttr.values, type);
 
-        for (auto const & v : theAttr.values)
-            write_primitive(v, type);
+        for (const auto & aVar : theAttr.values)
+            write_primitive(aVar, type);
     }
 }
 
@@ -337,8 +337,8 @@ void cdf_writer::write_attrs(attr_vector const & attrs) {
 
     write_typed_array_prefix(attrs, nc_attribute);
 
-    for (auto const & attr : attrs)
-        write_attr(attr);
+    for (const auto & anAttr : attrs)
+        write_attr(anAttr);
 }
 
 void cdf_writer::write_var_header(var & theVar, dim_vector const & dims, bool useClassic) {
@@ -348,8 +348,8 @@ void cdf_writer::write_var_header(var & theVar, dim_vector const & dims, bool us
     int32_t dimids_nelems = static_cast<int32_t>(theVar.dimids.size());
     write(*pOS, get_reversed_byte_order(dimids_nelems));
 
-    for (const auto & dimid : theVar.dimids)
-        write(*pOS, get_reversed_byte_order(dimid));
+    for (const auto & aDimId : theVar.dimids)
+        write(*pOS, get_reversed_byte_order(aDimId));
 
     write_attrs(theVar.attrs);
     
@@ -380,8 +380,8 @@ void cdf_writer::write_var_data(var const & theVar, dim_vector const & dims, boo
     //auto nelems = v.get_expected_nelems();
 
     // A little more efficient than creating on the stack and returning, copying, etc.
-    for (auto const & value : theVar.values)
-        write_primitive(value, type);
+    for (const auto & aValue : theVar.values)
+        write_primitive(aValue, type);
 
     // Here we do need to take variable data padding into consideration.
     int32_t writtenCount = theVar.values.size() * get_primitive_value_size(type);
@@ -393,14 +393,14 @@ void cdf_writer::write_var_data(var const & theVar, dim_vector const & dims, boo
 void cdf_writer::write_vars_data(var_vector const & vars, dim_vector const & dims, bool useClassic) {
 
     // Read the non-record data in header-specified order.
-    for (auto const & v : vars)
-        if (!v.is_record(dims))
-            write_var_data(v, dims, useClassic);
+    for (const auto & aVar : vars)
+        if (!aVar.is_record(dims))
+            write_var_data(aVar, dims, useClassic);
 
     // Then read the record data. Should be only one, but may occur in any pOSition AFAIK.
-    for (auto const & v : vars)
-        if (v.is_record(dims))
-            write_var_data(v, dims, useClassic);
+    for (const auto & aVar : vars)
+        if (aVar.is_record(dims))
+            write_var_data(aVar, dims, useClassic);
 }
 
 cdf_writer & cdf_writer::operator<<(netcdf & theCdf) {

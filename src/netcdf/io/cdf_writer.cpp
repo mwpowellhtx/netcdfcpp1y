@@ -228,8 +228,6 @@ void cdf_writer::prepare_var_array(netcdf & theCdf) {
         else
             current.begin64 += var_it->vsize;
     }
-
-    // TODO: TBD: then do something with the record_it ...
 }
 
 void cdf_writer::write_magic(magic const & theMagic) {

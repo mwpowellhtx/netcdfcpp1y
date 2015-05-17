@@ -26,10 +26,6 @@ functional injections are done to help the logic flow seemlessly.
 
 I have also used template functions in order to better leverage common areas of the core model.
 
-A reader/writer pair have been provided for convenience reading and writing binary formatted NC files. Some
-examples have been included for purposes of illustration only, which are also readily available via
-[UniData](http://www.unidata.ucar.edu/software/netcdf/examples/files.html).
-
 ## Feature Highlights
 
 API is constructed along functional slices. Underlying property types are provided, such as strongly typed
@@ -88,6 +84,11 @@ whose text member variable contains the string of interest. This is instead of h
 character, for efficiency purposes. Otherwise, primitively typed values are individually stored in a values vector.
 Consistent with the model design goals, details like number of elements is an intrinsic part of the model, which is
 simply determined using the [std::vector::size](http://www.cplusplus.com/reference/vector/vector/size/) function.
+
+A [reader](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/io/cdf_reader.h) /
+[writer](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/io/cdf_writer.h) pair have also been
+provided for convenient reading from and writing to binary formatted NC files. I did not include the files for space reasons, but these are readily readily available via
+[UniData](http://www.unidata.ucar.edu/software/netcdf/examples/files.html).
 
 ## Bucket List
 

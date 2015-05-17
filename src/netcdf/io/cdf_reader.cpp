@@ -50,7 +50,9 @@ std::string cdf_reader::read_text() {
     // This is the key to reading a proper name.
     auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
 
-    while (nelems-- > 0)
+    assert(nelems > 0);
+
+    while (nelems--)
         text += read<int8_t>(*pIS);
 
     int32_t readCount = text.length();

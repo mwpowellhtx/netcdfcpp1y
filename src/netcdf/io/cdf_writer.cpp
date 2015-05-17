@@ -237,17 +237,17 @@ void cdf_writer::write_magic(magic const & theMagic) {
 
 void cdf_writer::write_text(std::string const & theStr) {
 
-    int32_t written = theStr.length();
+    int32_t writtenCount = theStr.length();
 
     //Starting with the length...
-    write(*pOS, get_reversed_byte_order(static_cast<int32_t>(theStr.length())));
+    write(*pOS, get_reversed_byte_order(static_cast<int32_t>(writtenCount)));
 
     // Not including the terminating null char as far as I know.
     for (auto const & c : theStr)
         write(*pOS, c);
 
-    while (try_pad_width(written))
-        write(*pOS, static_cast<uint8_t>(0x0));
+    while (try_pad_width(writtenCount))
+        write(*pOS, static_cast<int8_t>(0x0));
 }
 
 void cdf_writer::write_named(named const & theNamed) {

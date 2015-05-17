@@ -185,22 +185,22 @@ void cdf_writer::prepare_var_array(netcdf & theCdf) {
     then packing that. that's an interesting way of doing it...
     http://afni.nimh.nih.gov/pub/dist/src/pkundu/meica.libs/nibabel/externals/netcdf.py */
 
-    auto & vars = theCdf.vars;
+    auto & theVars = theCdf.vars;
 
-    const auto & dims = theCdf.dims;
+    const auto & theDims = theCdf.dims;
     const auto useClassic = theCdf.magic.is_classic();
 
     // All of the calculations depend upon the vsize being calculated regardless whether record.
-    for (auto & aVar : vars)
-        aVar.vsize = __sizeof_data(aVar, dims, useClassic);
+    for (auto & aVar : theVars)
+        aVar.vsize = __sizeof_data(aVar, theDims, useClassic);
 
     // This is a little book keeping, that helps the subsequent operations flow much more smoothly.
     std::vector<var_vector::iterator> record_its, its;
 
     // TODO: TBD: may need/want to rearrange the vars according to record/non-record...
     // TODO: using the variables, there are how many record data? that can't be right ...
-    for (auto it = vars.begin(); it != vars.end(); it++) {
-        if (it->is_record(dims))
+    for (auto it = theVars.begin(); it != theVars.end(); it++) {
+        if (it->is_record(theDims))
             record_its.push_back(it);
         else
             its.push_back(it);

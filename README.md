@@ -36,26 +36,26 @@ API is constructed along functional slices. Underlying property types are provid
 enumerations closely aligned with the file format shape itself (i.e. nc_type). Top level components are as one
 might expect, in alphabetical order:
 
-* attr: Attribute
-* dim: Dimension
-* netcdf: The top level model
-* var: Variable
+* [attr](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/attr.h): Attribute
+* [dim](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/dim.h): Dimension
+* [netcdf](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/netcdf.h): The top level model
+* [var](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/var.h): Variable
 
 Details such as the entity type, number of elements, whether present or absent, are all intrinsically expressed
 as part of the model. These are really only important at the moment of load and/or save.
 
 Second-tier components include, in alphabetical order:
 
-* magic: Captures the &lsquo;magic&rsquo; fields in the file format
-* value: Value, used for both Attribute values as well as Variable values
+* [magic](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/magic.h): Captures the &lsquo;magic&rsquo; fields in the file format
+* [value](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/value.h): Value, used for both Attribute values as well as Variable values
 
 Plus corresponding [vectors](http://www.cplusplus.com/reference/vector/vector/) as makes sense to do so.
 
 Intrinsic slices include, in alphabetical order:
 
-* attributable: Variables and the NetCDF itself have Attributes associated with them
-* named: Dimension, Attribute, and Variable each have a Name associated with them
-* valuable: Attributes and Variables may both have Values associated with them
+* [attributable](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/attributable.h): Variables and the NetCDF itself have Attributes associated with them
+* [named](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/named.h): Dimension, Attribute, and Variable each have a Name associated with them
+* [valuable](http://github.com/mwpowellhtx/netcdfcpp1y/blob/master/src/netcdf/parts/valuable.h): Attributes and Variables may both have Values associated with them
 
 Vectored access is done using either an index, offset from begining of respective vector, or name.
 When appropriate a corresponding vector iterator will be returned.
@@ -101,6 +101,8 @@ this writing:
 * Improve functionality along the lines of Dimensionality, Attributing, and Variables
 * Provide API for access along potentially arbitrary number of Dimensions
 * Improve transparancy working with string text values as compared with primitively typed values
-* Provide netCDF-4 support
+* Provide netCDF-4 support, for things like
+[grouping](http://www.unidata.ucar.edu/software/netcdf/workshops/2010/groups-types/Introduction.html)
+first-class [types](http://www.unidata.ucar.edu/software/netcdf/workshops/2010/groups-types/Introduction.html)
 * Extend support for interested subject areas; beyond the scope of this repository, per se, except as referenced
 as a submodule

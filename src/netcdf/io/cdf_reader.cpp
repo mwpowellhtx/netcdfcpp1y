@@ -286,20 +286,22 @@ void cdf_reader::read_vars_data(var_vector & vars, dim_vector const & dims, bool
             read_var_data(aVar, dims, useClassic);
 }
 
-cdf_reader & cdf_reader::read_cdf(netcdf & cdf) {
+cdf_reader & cdf_reader::read_cdf(netcdf & theCdf) {
 
-    read_magic(cdf.magic);
+    read_magic(theCdf.magic);
 
     //TODO: pick this one up here: look up concerning the BNF format what to expect ...
-    cdf.numrecs = get_reversed_byte_order(read<int32_t>(*pIS));
+    theCdf.numrecs = get_reversed_byte_order(read<int32_t>(*pIS));
 
-    read_dims(cdf.dims);
+    read_dims(theCdf.dims);
 
-    read_attrs(cdf.attrs);
+    read_attrs(theCdf.attrs);
 
-    read_vars_header(cdf.vars, cdf.dims, cdf.magic.is_classic());
+    const auto useClassic = theCdf.magic.is_classic();
 
-    read_vars_data(cdf.vars, cdf.dims, cdf.magic.is_classic());
+    read_vars_header(theCdf.vars, theCdf.dims, useClassic);
+
+    read_vars_data(theCdf.vars, theCdf.dims, useClassic);
 
     return *this;
 }

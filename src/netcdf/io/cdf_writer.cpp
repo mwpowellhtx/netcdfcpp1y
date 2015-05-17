@@ -412,7 +412,7 @@ cdf_writer & cdf_writer::operator<<(netcdf & theCdf) {
 
     write_attrs(theCdf.attrs);
 
-    auto useClassic = theCdf.magic.is_classic();
+    const auto useClassic = theCdf.magic.is_classic();
 
     write_vars_header(theCdf.vars, theCdf.dims, useClassic);
 

@@ -1,12 +1,12 @@
-#ifndef NETCDF_INPUT_H
-#define NETCDF_INPUT_H
+#ifndef NETCDF_CDF_READER_H
+#define NETCDF_CDF_READER_H
 
 #pragma once
 
-#include <istream>
-
-#include "netcdf_file.h"
+#include "../netcdf.h"
 #include "network_byte_order.h"
+
+#include <istream>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -69,4 +69,4 @@ private:
 
 cdf_reader & operator>>(cdf_reader & reader, netcdf & cdf);
 
-#endif //NETCDF_INPUT_H
+#endif //NETCDF_CDF_READER_H

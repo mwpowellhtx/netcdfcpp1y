@@ -1,4 +1,4 @@
-#include "netcdf_output.h"
+#include "cdf_writer.h"
 
 #include <functional>
 #include <numeric>

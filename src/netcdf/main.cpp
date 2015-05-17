@@ -1,8 +1,8 @@
 
-#include "netcdf_file.h"
-#include "netcdf_input.h"
-#include "netcdf_output.h"
-#include "network_byte_order.h"
+#include "netcdf.h"
+#include "io/cdf_reader.h"
+#include "io/cdf_writer.h"
+#include "io/network_byte_order.h"
 
 #include <fstream>
 #include <cassert>
@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
         aVar.add_attr<float_vector>("some_floats", { static_cast<float_t>(4), static_cast<float_t>(5) });
         aVar.add_attr<double_vector>("some_doubles", { static_cast<double_t>(5) });
         aVar.add_text_attr("some_text", "the text");
-
 
         assert(aVar.attrs.size() == 6);
 
@@ -50,7 +49,7 @@ int main(int argc, char* argv[]) {
     }
 
     {
-        auto cdf = netcdf{};
+        auto & cdf = netcdf{};
 
         std::ifstream ifs("Data/sresa1b_ncar_ccsm3-example.nc", std::ios::binary);
 
@@ -62,7 +61,7 @@ int main(int argc, char* argv[]) {
     }
 
     {
-        auto cdf = netcdf{};
+        auto & cdf = netcdf{};
 
         std::ofstream ofs("Data/testing2.nc", std::ios::binary);
 

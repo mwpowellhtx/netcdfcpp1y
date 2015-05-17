@@ -64,17 +64,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="netcdf_file.h" />
-    <ClInclude Include="netcdf_input.h" />
-    <ClInclude Include="netcdf_output.h" />
-    <ClInclude Include="network_byte_order.h" />
+    <ClInclude Include="parts/attr.h" />
+    <ClInclude Include="parts/attributable.h" />
+    <ClInclude Include="parts/dim.h" />
+    <ClInclude Include="parts/enums.h" />
+    <ClInclude Include="parts/magic.h" />
+    <ClInclude Include="parts/named.h" />
+    <ClInclude Include="netcdf.h" />
+    <ClInclude Include="io/cdf_reader.h" />
+    <ClInclude Include="io/cdf_writer.h" />
+    <ClInclude Include="io/network_byte_order.h" />
+    <ClInclude Include="parts/utils.hpp" />
+    <ClInclude Include="parts/valuable.h" />
+    <ClInclude Include="parts/value.h" />
+    <ClInclude Include="parts/var.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="parts/attr.cpp" />
+    <ClCompile Include="parts/attributable.cpp" />
+    <ClCompile Include="parts/dim.cpp" />
+    <ClCompile Include="parts/magic.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="netcdf_file.cpp" />
-    <ClCompile Include="netcdf_input.cpp" />
-    <ClCompile Include="netcdf_output.cpp" />
-    <ClCompile Include="network_byte_order.cpp" />
+    <ClCompile Include="parts/named.cpp" />
+    <ClCompile Include="netcdf.cpp" />
+    <ClCompile Include="io/cdf_reader.cpp" />
+    <ClCompile Include="io/cdf_writer.cpp" />
+    <ClCompile Include="io/network_byte_order.cpp" />
+    <ClCompile Include="parts/utils.cpp" />
+    <ClCompile Include="parts/valuable.cpp" />
+    <ClCompile Include="parts/value.cpp" />
+    <ClCompile Include="parts/var.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

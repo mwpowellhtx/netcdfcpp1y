@@ -1,12 +1,12 @@
-#ifndef NETCDF_OUTPUT_H
-#define NETCDF_OUTPUT_H
+#ifndef NETCDF_CDF_WRITER_H
+#define NETCDF_CDF_WRITER_H
 
 #pragma once
 
-#include <ostream>
-
-#include "netcdf_file.h"
+#include "../netcdf.h"
 #include "network_byte_order.h"
+
+#include <ostream>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -83,4 +83,4 @@ private:
     }
 };
 
-#endif //NETCDF_OUTPUT_H
+#endif //NETCDF_CDF_WRITER_H

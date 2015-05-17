@@ -181,7 +181,7 @@ vsize_type __sizeof_data(var const & theVar, dim_vector const & dims, bool useCl
 
 void cdf_writer::prepare_var_array(netcdf & theCdf) {
 
-    /* Python netcdf is using the actual file pOSition to inform the begin value
+    /* Python netcdf is using the actual file position to inform the begin value
     then packing that. that's an interesting way of doing it...
     http://afni.nimh.nih.gov/pub/dist/src/pkundu/meica.libs/nibabel/externals/netcdf.py */
 
@@ -195,26 +195,26 @@ void cdf_writer::prepare_var_array(netcdf & theCdf) {
         aVar.vsize = __sizeof_data(aVar, theDims, useClassic);
 
     // This is a little book keeping, that helps the subsequent operations flow much more smoothly.
-    std::vector<var_vector::iterator> record_its, its;
+    std::vector<var_vector::iterator> record_bms, bms;
 
     // TODO: TBD: may need/want to rearrange the vars according to record/non-record...
     // TODO: using the variables, there are how many record data? that can't be right ...
     for (auto it = theVars.begin(); it != theVars.end(); it++) {
         if (it->is_record(theDims))
-            record_its.push_back(it);
+            record_bms.push_back(it);
         else
-            its.push_back(it);
+            bms.push_back(it);
     }
 
     // Concatenate the record vars to the end of the non-record vars.
-    its.insert(its.end(), record_its.begin(), record_its.end());
+    bms.insert(bms.end(), record_bms.begin(), record_bms.end());
 
     // Initialize the current with the size of the header.
     const auto sizeof_header = __sizeof_header(theCdf);
     offset_t current = { { sizeof_header } };
 
     // Calculate the begin offsets for non-record data.
-    for (auto bm = its.begin(); bm != its.end(); bm++) {
+    for (auto bm = bms.begin(); bm != bms.end(); bm++) {
 
         // Drill through the bookmark to the true inner iterator.
         auto var_it = *bm;

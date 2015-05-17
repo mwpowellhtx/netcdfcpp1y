@@ -1,9 +1,11 @@
 # Network Common Data Format for C++1y
 
-Or NetCDF for short, is not exactly new. Neither are API that know how to handle the file format. I started out
-this repository with the express design goal that the core model should inherently, intrinsically know how to
-handle itself, while at the same time leveraging present day C++1y language features. This repository provides
-the core API and ability to load and save an NC classic file.
+[NetCDF](http://en.wikipedia.org/wiki/NetCDF) has been around since 1989. There are also numerous API to help
+deal with the file format under a variety of operating conditions.
+
+I started out this repository with the express design goal that the core model should inherently, intrinsically
+know how to handle itself, while at the same time leveraging present day C++1y language features. This repository
+provides the core API and ability to load and save an NC classic file.
 
 Assumptions that I make include that compilers and linkers will perform adequate optimization that make doing
 so highly productive.

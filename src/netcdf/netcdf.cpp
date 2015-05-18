@@ -24,24 +24,23 @@ netcdf::netcdf(netcdf const & other)
 netcdf::~netcdf() {
 }
 
-void netcdf::add_dim(dim const & theDim, int32_t default_dim_length) {
-
-    //TODO: check for name conflicts
-    //TODO: TBD: may inject policies into the netcdf, add/remove/access functions ... i.e. allow_add_record_dim
+dim_vector::iterator netcdf::add_dim(dim const & theDim, int32_t default_dim_length) {
 
     // There may be 0-1 unlimited (record) dims.
     if (theDim.is_record()) {
-        for (auto & x : dims)
-            if (x.is_record())
-                x.dim_length = default_dim_length;
+        for (auto & aDim : dims)
+            if (aDim.is_record())
+                aDim.dim_length = default_dim_length;
     }
 
     // Always add to the end for minimum impact on previously existing dims, dimids, etc.
     dims.push_back(theDim);
+
+    return get_dim(theDim.name);
 }
 
-void netcdf::add_dim(std::string const & name, int32_t dim_length, int32_t default_dim_length) {
-    add_dim(dim(name, dim_length), default_dim_length);
+dim_vector::iterator netcdf::add_dim(std::string const & name, int32_t dim_length, int32_t default_dim_length) {
+    return add_dim(dim(name, dim_length), default_dim_length);
 }
 
 void netcdf::set_unlimited_dim(dim_vector::iterator dim_it, int32_t default_dim_length) {
@@ -68,6 +67,26 @@ void netcdf::set_unlimited_dim(std::string const & name, int32_t default_dim_len
     auto dim_it = get_dim(name);
 
     set_unlimited_dim(dim_it, default_dim_length);
+}
+
+var_vector::iterator netcdf::add_var(var const & theVar) {
+
+    // Record variables go at the end of the vector.
+    var_vector::iterator where_it = vars.end();
+
+    // Non-record variables go at the end of the non-record variables.
+    if (!theVar.is_record(dims)) {
+        for (auto it = vars.begin(); it != vars.end(); it++)
+            if (!it->is_record(dims)) where_it = it;
+    }
+
+    vars.insert(where_it, theVar);
+
+    return get_var(theVar.name);
+}
+
+var_vector::iterator netcdf::add_var(std::string  & name, nc_type theType) {
+    return add_var(var(name, theType));
 }
 
 var_vector::iterator netcdf::get_var(var_vector::size_type i) {

@@ -19,9 +19,16 @@ var::var()
     , valuable(nc_double)
     , dimids()
     , vsize(0)
-    , offset() {
+    , offset({ { 0LL } }) {
+}
 
-    memset(&offset, sizeof(offset), 0);
+var::var(std::string const & name, nc_type theType)
+    : named(name)
+    , attributable()
+    , valuable(theType)
+    , dimids()
+    , vsize(0)
+    , offset({ { 0LL } }) {
 }
 
 var::var(var const & other)

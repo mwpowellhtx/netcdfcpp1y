@@ -29,8 +29,8 @@ public:
 
     virtual ~netcdf();
 
-    virtual void add_dim(dim const & aDim, int32_t default_dim_length = 1);
-    virtual void add_dim(std::string const & name, int32_t dim_length = 1, int32_t default_dim_length = 1);
+    virtual dim_vector::iterator add_dim(dim const & aDim, int32_t default_dim_length = 1);
+    virtual dim_vector::iterator add_dim(std::string const & name, int32_t dim_length = 1, int32_t default_dim_length = 1);
 
     virtual dim_vector::iterator get_dim(dim_vector::size_type i);
     virtual dim_vector::iterator get_dim(std::string const & name);
@@ -38,6 +38,9 @@ public:
     virtual void set_unlimited_dim(dim_vector::iterator dim_it, int32_t default_dim_length = 1);
     virtual void set_unlimited_dim(dim_vector::size_type const & i, int32_t default_dim_length = 1);
     virtual void set_unlimited_dim(std::string const & name, int32_t default_dim_length = 1);
+
+    virtual var_vector::iterator add_var(var const & aVar);
+    virtual var_vector::iterator add_var(std::string  & name, nc_type aType);
 
     virtual var_vector::iterator get_var(var_vector::size_type i);
     virtual var_vector::iterator get_var(std::string const & name);

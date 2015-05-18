@@ -27,6 +27,7 @@ struct var : public named, public attributable, public valuable {
     offset_t offset;
 
     var();
+    var(std::string const & name, nc_type aType);
     var(var const & other);
 
     virtual ~var();

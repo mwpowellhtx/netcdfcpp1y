@@ -36,7 +36,7 @@ dim_vector::iterator netcdf::add_dim(dim const & theDim, int32_t default_dim_len
     // Always add to the end for minimum impact on previously existing dims, dimids, etc.
     dims.push_back(theDim);
 
-    return get_dim(theDim.name);
+    return dims.begin() + dims.size() - 1;
 }
 
 dim_vector::iterator netcdf::add_dim(std::string const & name, int32_t dim_length, int32_t default_dim_length) {
@@ -80,9 +80,7 @@ var_vector::iterator netcdf::add_var(var const & theVar) {
             if (!it->is_record(dims)) where_it = it;
     }
 
-    vars.insert(where_it, theVar);
-
-    return get_var(theVar.name);
+    return vars.insert(where_it, theVar);
 }
 
 var_vector::iterator netcdf::add_var(std::string  & name, nc_type theType) {

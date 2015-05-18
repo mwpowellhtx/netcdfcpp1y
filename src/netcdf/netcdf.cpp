@@ -26,6 +26,7 @@ netcdf::~netcdf() {
 
 dim_vector::iterator netcdf::add_dim(dim const & theDim, int32_t default_dim_length) {
 
+    //TODO: TBD: may also mean needing to rearrange variables for record/non-record data purposes ...
     // There may be 0-1 unlimited (record) dims.
     if (theDim.is_record()) {
         for (auto & aDim : dims)
@@ -33,10 +34,8 @@ dim_vector::iterator netcdf::add_dim(dim const & theDim, int32_t default_dim_len
                 aDim.dim_length = default_dim_length;
     }
 
-    // Always add to the end for minimum impact on previously existing dims, dimids, etc.
-    dims.push_back(theDim);
-
-    return dims.begin() + dims.size() - 1;
+    // Insert the dimension at the end of the vector.
+    return dims.insert(dims.end(), theDim);
 }
 
 dim_vector::iterator netcdf::add_dim(std::string const & name, int32_t dim_length, int32_t default_dim_length) {

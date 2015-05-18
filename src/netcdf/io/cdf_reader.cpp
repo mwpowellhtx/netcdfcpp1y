@@ -153,18 +153,18 @@ void cdf_reader::read_attr(attr & theAttr) {
 
     if (theAttr.get_type() == nc_char) {
         // 'nelems' is a function of the std::string in this use case.
-        theAttr.values = { value(read_text()) };
+        theAttr.set_text(read_text());
     }
     else {
 
         // Otherwise read the values as they were indicated.
         auto nelems = get_reversed_byte_order(read<int32_t>(*pIS));
 
-        //TODO: may want to pre-allocate these as with variable/data
-        theAttr.values.clear();
+        // Allocate the capacity of values and read those in.
+        theAttr.values = value_vector(nelems);
 
-        while (theAttr.values.size() != nelems)
-            theAttr.values.push_back(read_primitive(theAttr.get_type()));
+        for (auto & aValue : theAttr.values)
+            assert(try_read_primitive(aValue, theAttr.get_type()));
     }
 }
 

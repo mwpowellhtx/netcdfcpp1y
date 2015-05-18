@@ -4,22 +4,20 @@
 #pragma once
 
 #include "../netcdf.h"
-#include "network_byte_order.h"
+#include "cdf_binary_base.h"
 
 #include <istream>
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct cdf_reader {
+struct cdf_reader : public cdf_binary_base {
 private:
 
     std::istream * pIS;
 
-    bool reverseByteOrder;
-
 public:
 
-    cdf_reader(std::istream * pIS, bool reverseByteOrder = false);
+    cdf_reader(std::istream * pIS, bool reverse_byte_order = false);
 
 private:
 
@@ -57,12 +55,6 @@ private:
     cdf_reader & read_cdf(netcdf & cdf);
 
     friend cdf_reader & operator>>(cdf_reader & reader, netcdf & cdf);
-
-    template<typename _Ty>
-    _Ty get_reversed_byte_order(_Ty const & x) {
-        _Ty local = x;
-        return reverseByteOrder ? swap_endian(local) : local;
-    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

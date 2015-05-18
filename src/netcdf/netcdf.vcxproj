@@ -64,6 +64,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="io\cdf_binary_base.h" />
     <ClInclude Include="parts/attr.h" />
     <ClInclude Include="parts/attributable.h" />
     <ClInclude Include="parts/dim.h" />
@@ -80,6 +81,7 @@
     <ClInclude Include="parts/var.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="io\cdf_binary_base.cpp" />
     <ClCompile Include="parts/attr.cpp" />
     <ClCompile Include="parts/attributable.cpp" />
     <ClCompile Include="parts/dim.cpp" />

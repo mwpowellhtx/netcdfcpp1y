@@ -1,6 +1,7 @@
 #include "cdf_reader.h"
 
 #include <cassert>
+#include <set>
 
 template<typename _Ty>
 _Ty read(std::istream & is) {
@@ -17,8 +18,9 @@ cdf_version to_cdf_version(uint8_t value) {
     throw std::exception("unsupported cdf version");
 }
 
-cdf_reader::cdf_reader(std::istream * pIS, bool reverseByteOrder)
-    : pIS(pIS), reverseByteOrder(reverseByteOrder) {
+cdf_reader::cdf_reader(std::istream * pIS, bool reverse_byte_order)
+    : cdf_binary_base(reverse_byte_order)
+    , pIS(pIS) {
 }
 
 void cdf_reader::read_magic(magic & magic) {
@@ -67,34 +69,33 @@ void cdf_reader::read_named(named & named) {
     named.name = read_text();
 }
 
-bool cdf_reader::try_read_primitive(value & value, nc_type const & type) {
+bool cdf_reader::try_read_primitive(value & theValue, nc_type const & type) {
 
-    // This use case is handled elsewhere.
-    assert(!(type == nc_char
-        || type == nc_dimension
-        || type == nc_attribute
-        || type == nc_variable));
+    static const std::set<nc_type> supported = { nc_byte, nc_short, nc_int, nc_float, nc_double };
+
+    // Assert that the type is supported.
+    assert(supported.find(type) != supported.end());
 
     switch (type) {
 
     case nc_byte:
-        value.primitive.b = read<uint8_t>(*pIS);
+        theValue.primitive.b = read<uint8_t>(*pIS);
         return true;
 
     case nc_short:
-        value.primitive.s = get_reversed_byte_order(read<int16_t>(*pIS));
+        theValue.primitive.s = get_reversed_byte_order(read<int16_t>(*pIS));
         return true;
 
     case nc_int:
-        value.primitive.i = get_reversed_byte_order(read<int32_t>(*pIS));
+        theValue.primitive.i = get_reversed_byte_order(read<int32_t>(*pIS));
         return true;
 
     case nc_float:
-        value.primitive.f = read<float_t>(*pIS);
+        theValue.primitive.f = read<float_t>(*pIS);
         return true;
 
     case nc_double:
-        value.primitive.d = read<double_t>(*pIS);
+        theValue.primitive.d = read<double_t>(*pIS);
         return true;
     }
 

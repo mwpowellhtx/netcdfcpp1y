@@ -4,18 +4,16 @@
 #pragma once
 
 #include "../netcdf.h"
-#include "network_byte_order.h"
+#include "cdf_binary_base.h"
 
 #include <ostream>
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct cdf_writer {
+struct cdf_writer : public cdf_binary_base {
 private:
 
     std::ostream * pOS;
-
-    std::string path;
 
     bool reverse_byte_order;
 
@@ -64,12 +62,6 @@ private:
     void write_var_data(var const & aVar, dim_vector const & dims, bool useClassic);
 
     void write_vars_data(var_vector const & vars, dim_vector const & dims, bool useClassic);
-
-    template<typename _Ty>
-    _Ty get_reversed_byte_order(_Ty const & x) {
-        _Ty local = x;
-        return reverse_byte_order ? swap_endian(local) : local;
-    }
 
     template<typename _Vector>
     void write_typed_array_prefix(_Vector const & theValues, nc_type presentType) {

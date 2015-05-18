@@ -15,46 +15,49 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="network_byte_order.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="utils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="magic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="named.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="value.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="valuable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dim.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="attr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="attributable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="var.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="netcdf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cdf_writer.h">
+    <ClInclude Include="parts/attr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cdf_reader.h">
+    <ClInclude Include="parts/attributable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/dim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/magic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/named.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="io/cdf_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="io/cdf_writer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="io/network_byte_order.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/valuable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/value.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parts/var.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="io\cdf_binary_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,43 +65,46 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="network_byte_order.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="magic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="named.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="value.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="valuable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dim.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="attr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="attributable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="var.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="netcdf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cdf_writer.cpp">
+    <ClCompile Include="parts/attr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cdf_reader.cpp">
+    <ClCompile Include="parts/attributable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parts/dim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parts/magic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parts/named.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="io/cdf_reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="io/cdf_writer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="io/network_byte_order.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parts/utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parts/valuable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parts/value.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parts/var.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="io\cdf_binary_base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
